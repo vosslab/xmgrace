@@ -21,8 +21,8 @@
 - Removed the inherited desktop C build, vendored libraries, and bundled manuals.
 - Made the web app own its blank projects and editable examples while preserving AGR interoperability.
 - Linked the live GitHub Pages app in the README and refreshed the screenshot.
-- Restored GitHub Pages build checks on pushes to `main`, with publication on manual dispatch.
-- Gave GitHub Pages validation and publication runs distinct names in Actions.
+- Made successful pushes to `main` build, test, and publish GitHub Pages. Manual workflow runs
+  can republish `main`.
 - Used ASCII escapes for Greek plot labels and submenu chevrons, and moved axis rendering
   into a separate Rust module to meet the source line limit.
 

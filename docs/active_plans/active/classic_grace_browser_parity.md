@@ -17,7 +17,7 @@ building the project-model boundaries needed for full GUI parity.
 - Preserve Grace menu names, toolbar labels, and control placement while using modern CSS.
 - Keep project files and imported data local to the browser and save output through downloads.
 - Maintain AGR interoperability with Grace 5.1.25 and document intentional browser limits.
-- Build and test pushes to `main` automatically while keeping Pages publication manual.
+- Build, test, and publish successful pushes to `main`, while retaining a manual rebuild route.
 
 ## Design philosophy
 
@@ -72,7 +72,7 @@ This inventory records the implemented features and the remaining work.
 
 | Milestone | Component | Review boundary |
 | --- | --- | --- |
-| M0 | Build workflow and fixture corpus | Push validation and owner-dispatched publication are separate. |
+| M0 | Build workflow and fixture corpus | Successful `main` pushes validate and publish; manual rebuild remains available. |
 | M1 | Project, dataset, and expression core | Rust validates input before any mutation and preserves stable graph/set IDs. |
 | M2 | Numerical analysis | Rust functions consume typed rows and return complete derived rows before result-set allocation. |
 | M3 | AGR, layout, renderer, text, and objects | Typed supported settings round-trip. Unknown semantics remain read-only with original download. |
@@ -86,14 +86,14 @@ This inventory records the implemented features and the remaining work.
 | `rust/src/` | Typed model, AGR codec, analysis, SVG layout, command execution, and Wasm adapter. | Grace 5.1.25 fixtures and browser contracts. |
 | `src/` and `src/web/` | Classic menu and toolbar surface, dialogs, local file selection, download workflows, and browser interaction. | Rust command and summary types. |
 | `tests/` | Numerical, AGR, rendering, and browser workflow tests. | Stable user-visible behavior. |
-| `.github/workflows/` | Validate pull requests and `main` pushes. Publish only from manual dispatch. | `build_github_pages.sh`. |
+| `.github/workflows/` | Build, test, and publish successful `main` pushes, with a manual rebuild route. | `build_github_pages.sh`. |
 | `docs/` | Compatibility matrix, active plan, release history, changelog, usage, and screenshot evidence. | Verified implementation behavior. |
 
 ## Milestone plan
 
 | M | Title | Summary | Goal |
 | --- | --- | --- | --- |
-| M0 | Reference and automation | Pin Grace 5.1.25 fixtures and restore `main` push validation. | Every parity claim has a reproducible reference. |
+| M0 | Reference and automation | Pin Grace 5.1.25 fixtures and restore `main` push validation and publication. | Every parity claim has a reproducible reference. |
 | M1 | Data foundations | Finish formula creation, spreadsheet editing, table mapping, set operations, and ASCII export. | A user can create, edit, save, and reopen scientific data without leaving the browser. |
 | M2 | Analysis | Finish transformations, fitting, feature extraction, and numerical parity evidence. | Derived data becomes editable Grace sets with useful diagnostics. |
 | M3 | Plot and project fidelity | Complete graph/set/axis/annotation models, renderer paths, AGR round trips, and classic canvas workflow. | Representative desktop AGR files can be edited without semantic loss. |
@@ -104,10 +104,10 @@ This inventory records the implemented features and the remaining work.
 
 - Depends on: none.
 - Deliverables: Grace 5.1.25 fixture provenance, native and Wasm comparison harnesses, and the
-  push-validation workflow.
+  `main` publication workflow with a manual rebuild route.
 - Entry criteria: local `gracebat` reference is available.
-- Exit criteria: a `main` push runs build and tests without publishing, and manual dispatch is
-  still the only upload/deploy route.
+- Exit criteria: a successful `main` push runs build and tests before publishing its artifact.
+  Manual dispatch can rebuild and republish `main`.
 - Parallel-plan ready: yes. Fixture collection is independent of GUI implementation.
 
 ### Milestone M1
@@ -198,8 +198,9 @@ Save and export actions download files. Reload asks the user to select the file 
 
 ## Rollout and release checklist
 
-- [ ] Verify pull-request and `main` push validation on GitHub Actions.
-- [ ] Verify owner-dispatched Pages publication with production artifact tests.
+- [ ] Verify a `main` push publication on GitHub Actions.
+- [x] Verify manual dispatch of `e033f18` rebuilt and published the live Pages artifact with the
+  restored classic toolbar.
 - [x] Refresh the README screenshot with the restored toolbar and cooling plot.
 - [x] Document the available workflows and known limitations in [Browser compatibility](../../WEB_APP.md#compatibility).
 - [x] Confirm saved AGR, PNG, and PDF in clean Chromium, Firefox, and WebKit contexts.
