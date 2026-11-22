@@ -22,6 +22,7 @@
 - Made the web app own its blank projects and editable examples while preserving AGR interoperability.
 - Linked the live GitHub Pages app in the README and refreshed the screenshot.
 - Restored GitHub Pages build checks on pushes to `main`, with publication on manual dispatch.
+- Gave GitHub Pages validation and publication runs distinct names in Actions.
 - Used ASCII escapes for Greek plot labels and submenu chevrons, and moved axis rendering
   into a separate Rust module to meet the source line limit.
 

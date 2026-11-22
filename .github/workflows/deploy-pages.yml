@@ -1,4 +1,7 @@
 name: Deploy GitHub Pages
+run-name: >-
+  ${{ github.event_name == 'workflow_dispatch' && 'Publish GitHub Pages' ||
+  'Validate GitHub Pages build' }} for ${{ github.ref_name }}
 
 on:
   push:

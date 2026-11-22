@@ -52,9 +52,14 @@ downloads and documentation. [Desktop Grace project](https://plasma-gate.weizman
 
 ## Publishing
 
-The Pages build writes a static site to `dist/`. The repository owner can select GitHub
-Actions as the Pages source, then dispatch **Deploy GitHub Pages** when ready.
-Pull requests and pushes to `main` run build and test checks. Only manual dispatch publishes.
+The Pages build writes a static site to `dist/`. Pull requests and pushes to `main` appear in
+Actions as **Validate GitHub Pages build**. These runs build and test the selected commit.
+
+With GitHub Actions set as the Pages source, the repository owner can open **Deploy GitHub Pages**
+in Actions, select **Run workflow**, and choose `main`. The **Publish GitHub Pages** run builds,
+tests, and publishes that revision. A successful validation run leaves the previously published
+revision live. [Deploy GitHub Pages workflow](https://github.com/vosslab/xmgrace/actions/workflows/deploy-pages.yml)
+
 The build packages the original Grace copyright and
 [GPL-2.0-or-later license](../LICENSE.GPL-2.0-or-later) alongside the application.
 The Rust and TypeScript source and build scripts are in the same
