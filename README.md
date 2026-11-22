@@ -1,0 +1,73 @@
+# Grace
+
+A scientific plotting app for researchers, instructors, and students who want to make XY plots in
+the browser, edit them with the classic Grace controls, and save projects that desktop Grace can open.
+
+The TypeScript and Rust/WebAssembly browser port is in development. It supports an editable XY
+workflow, including linear and logarithmic axes, symbols, line styles, and SVG export. Projects
+with unsupported Grace settings open as read-only previews with diagnostics. See the
+compatibility table in [docs/WEB_APP.md](docs/WEB_APP.md).
+
+## A plot in Grace
+
+The example below turns seven time and temperature readings into a plot with labeled axes.
+The data stays in your browser.
+
+<!-- screenshots:begin (managed by screenshot-docs) -->
+![Grace window showing a blue cooling curve with labeled time and temperature axes](docs/screenshots/cooling_curve.webp)
+<!-- screenshots:end -->
+
+## Quick start
+
+For a local macOS build, install the tools with Homebrew. The app uses Node.js 26, Rust 1.100
+or newer, and the WebAssembly target. The local preview script uses Python 3.
+
+```bash
+brew bundle
+rustup toolchain install stable --target wasm32-unknown-unknown
+npm ci
+PORT=8787 ./run_web_server.sh
+```
+
+Open `http://localhost:8787/`. The Grace window opens to a blank graph.
+
+## Make the cooling plot
+
+Save these sample readings as `cooling.dat`. Each line contains elapsed minutes and temperature
+in degrees Celsius.
+
+```text
+0 85
+2 68
+4 55
+6 45
+8 38
+10 33
+12 29
+```
+
+1. Choose **Data > Import ASCII...** and open `cooling.dat`. Grace scales the axes to fit the data.
+2. Use **Plot > Axis properties...** to label the X axis **Time (min)** and the Y axis
+   **Temperature (&deg;C)**. Use **Plot > Graph appearance...** to title the plot **Cooling curve**.
+   To match the screenshot, set the X axis start and stop to `-1` and `13`, then choose
+   **Blue** and **Circle** under **Plot > Set appearance...**.
+3. Choose **File > Save as...** for an editable `.agr` project, or **Data > Export SVG...** for a
+   vector figure.
+
+## Documentation
+
+- Build, verify, and check which Grace features are supported. [docs/WEB_APP.md](docs/WEB_APP.md)
+- Install desktop Grace or look up its original controls. [doc/UsersGuide.html](doc/UsersGuide.html)
+- Work through the original desktop plotting exercises. [doc/Tutorial.html](doc/Tutorial.html)
+- Find answers to common desktop Grace questions. [doc/FAQ.html](doc/FAQ.html)
+- Follow browser port changes. [docs/CHANGELOG.md](docs/CHANGELOG.md)
+- Read the upstream release history. [CHANGES](CHANGES)
+
+## License and credits
+
+Grace stands for GRaphing, Advanced Computation and Exploration of data. The port builds on the
+work of Paul J. Turner and the Grace Development Team. [COPYRIGHT](COPYRIGHT)
+
+Grace and the browser port use the GNU General Public License version 2 or later.
+[LICENSE.GPL-2.0-or-later](LICENSE.GPL-2.0-or-later)
+

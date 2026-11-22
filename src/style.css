@@ -1,0 +1,62 @@
+:root {
+	color-scheme: light;
+	font: 13px system-ui, sans-serif;
+	color: #15191a;
+	background: #bbbcb6;
+	--border: #74786f;
+	--panel: #d4d5ce;
+	--raised: inset 1px 1px 0 #fff, inset -1px -1px 0 #90968c;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; height: 100dvh; display: grid; grid-template-rows: auto 1fr auto; }
+button, input, select { font: inherit; }
+button, select { background: var(--panel); border: 1px solid var(--border); box-shadow: var(--raised); padding: .28rem .6rem; color: inherit; }
+button:enabled { cursor: pointer; }
+button:enabled:hover, summary:hover, .menu a:hover { background: #e3e8dd; }
+button[aria-pressed="true"] { background: #abb9a3; box-shadow: inset 1px 1px 0 #626d5d; }
+:focus-visible { outline: 2px solid #24522d; outline-offset: 1px; }
+.titlebar { background: #405944; color: #fff; padding: .38rem .75rem; }
+nav { display: flex; align-items: center; padding-inline: .4rem; border-bottom: 1px solid var(--border); background: var(--panel); }
+nav > details { position: relative; }
+nav > details:last-child { margin-left: auto; }
+summary { list-style: none; user-select: none; cursor: pointer; padding: .42rem .85rem; }
+summary::-webkit-details-marker { display: none; }
+details[open] summary { box-shadow: inset 1px 1px 0 var(--border); }
+.menu { position: absolute; z-index: 2; min-width: 12rem; border: 1px solid var(--border); padding: .2rem; box-shadow: 3px 4px 7px #0004; background: var(--panel); }
+details:last-child .menu { right: 0; }
+.menu button, .menu a { background: transparent; box-shadow: none; border: 0; display: block; text-align: left; width: 100%; white-space: nowrap; padding: .38rem .7rem; }
+.menu a { color: inherit; text-decoration: none; }
+.menu hr { margin: .15rem .4rem; border: 0; border-top: 1px solid var(--border); }
+.locator { display: flex; align-items: center; gap: 1rem; padding: .3rem .6rem; border-bottom: 1px solid var(--border); background: var(--panel); }
+.locator output { font-family: monospace; }
+main { min-height: 0; display: flex; }
+aside { flex: 0 0 54px; display: flex; flex-direction: column; gap: .35rem; padding: .4rem; border-right: 1px solid var(--border); background: var(--panel); }
+aside button { padding-inline: .2rem; }
+.arrows { display: grid; grid-template-columns: repeat(2, 1fr); gap: .2rem; }
+#workspace { min-width: 0; overflow: auto; flex: 1; display: flex; flex-direction: column; align-items: center; background: #a6a99e; padding: .9rem; }
+#canvas { position: relative; width: min(100%, calc((100dvh - 8.8rem) * var(--page-ratio, 1.294))); background: white; box-shadow: 0 0 0 1px #6d7066, 2px 3px 8px #0004; line-height: 0; }
+#plot { display: block; width: 100%; height: auto; user-select: none; }
+#canvas.zoom { cursor: crosshair; touch-action: none; }
+#rubber-band { position: absolute; border: 1px dashed #21421b; background: #65a45625; pointer-events: none; }
+#diagnostic-banner { padding: .45rem .6rem; margin-bottom: .65rem; background: #fff1bf; width: 100%; }
+footer { border-top: 1px solid var(--border); background: var(--panel); padding: .35rem .65rem; }
+dialog { color: inherit; min-width: min(25rem, 90vw); max-width: min(42rem, 90vw); max-height: 85dvh; padding: 0; border: 1px solid var(--border); background: var(--panel); box-shadow: 4px 6px 14px #0007; }
+dialog::backdrop { background: #2224; }
+dialog h2 { font-size: 1rem; margin: 0; padding: .45rem .65rem; background: #405944; color: #fff; }
+dialog form { padding: .75rem; }
+#dialog-content { display: grid; gap: .6rem; }
+#dialog-content label { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); align-items: center; gap: .6rem; }
+input:not([type="checkbox"], [type="file"]) { width: 100%; min-width: 0; padding: .32rem; border: 1px solid var(--border); }
+.dialog-buttons { margin-top: 1rem; display: flex; justify-content: flex-end; gap: .4rem; }
+#dialog-error { color: #8b220e; }
+@media (max-width: 520px) {
+	summary { padding-inline: .45rem; }
+	aside { flex-basis: 44px; }
+	#workspace { padding: .5rem; }
+}
+@media print {
+	body, main, #workspace { display: block; height: auto; margin: 0; padding: 0; background: white; }
+	header, aside, footer, #diagnostic-banner, dialog { display: none !important; }
+	#canvas { box-shadow: none; width: 100%; }
+}

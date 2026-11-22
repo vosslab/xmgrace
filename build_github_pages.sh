@@ -60,6 +60,8 @@ fi
 rm -rf dist
 mkdir -p dist
 
+wasm-pack build . --release --target web --out-dir generated/wasm --out-name grace --locked
+
 ./node_modules/.bin/tsc --noEmit -p tsconfig.json
 
 ./node_modules/.bin/esbuild "$ENTRY" \
@@ -71,11 +73,22 @@ mkdir -p dist
 	--sourcemap \
 	--outfile=dist/main.js
 
+./node_modules/.bin/esbuild src/web/worker.ts \
+	--bundle --format=esm --target=es2020 --platform=browser --minify \
+	--sourcemap --outfile=dist/worker.js
+cp generated/wasm/grace_bg.wasm dist/
+mkdir -p dist/help dist/examples
+cp doc/*.html doc/*.dat doc/*.agr doc/mygraph.png doc/philosophical-gnu-sm.jpg dist/help/
+cp examples/{log2log,terr,manygraphs,polar,typeset}.agr dist/examples/
+cp COPYRIGHT LICENSE.GPL-2.0-or-later dist/
+
 cp src/index.html dist/index.html
 cp src/style.css dist/style.css
 touch dist/.nojekyll
 
 test -f dist/index.html
 test -f dist/main.js
+test -f dist/worker.js
+test -f dist/grace_bg.wasm
 
 echo "Built dist/ (GitHub Pages-ready)."

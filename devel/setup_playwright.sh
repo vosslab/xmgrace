@@ -18,8 +18,8 @@ if [ ! -d node_modules ]; then
 	exit 1
 fi
 
-echo "Installing Chromium and Firefox for Playwright..."
-npx playwright install chromium firefox
+echo "Installing Chromium, Firefox, and WebKit for Playwright..."
+npx playwright install chromium firefox webkit
 
 echo "Playwright setup complete."
 echo "  bash run_playwright_tests.sh - run Playwright tests (or: npm run test:playwright)"
