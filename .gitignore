@@ -1,0 +1,36 @@
+# === UNIVERSAL === [PROPAGATED - LOCAL EDITS OVERWRITTEN]
+.DS_Store
+/node_modules/
+/.env
+/report_*.txt
+/output*/
+/generated/
+/graphify-out/
+_temp*.?*
+/temp/
+/tests/_temp/
+/OTHER_REPOS/
+/LOCAL_ONLY/
+
+# === RUST === [PROPAGATED - LOCAL EDITS OVERWRITTEN]
+/target/
+**/target/
+**/*.rs.bk
+.rust_analyzer/
+
+# === TYPESCRIPT === [PROPAGATED - LOCAL EDITS OVERWRITTEN]
+dist/
+dist_*/
+_site/
+*.tsbuildinfo
+.prettiercache
+test-results/
+playwright-report/
+blob-report/
+coverage/
+meta.json
+stats.html
+
+# -------------------- LOCAL REPOSITORY RULES --------------------
+# ADD YOUR CUSTOM IGNORES BELOW
+# Propagation preserves this section.
