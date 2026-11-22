@@ -1,62 +1,473 @@
 :root {
-	color-scheme: light;
-	font: 13px system-ui, sans-serif;
-	color: #15191a;
-	background: #bbbcb6;
-	--border: #74786f;
-	--panel: #d4d5ce;
-	--raised: inset 1px 1px 0 #fff, inset -1px -1px 0 #90968c;
+  color-scheme: light;
+  font:
+    0.875rem/1.45 system-ui,
+    sans-serif;
+  color: #182c3a;
+  background: #f6f8fa;
+  --ink: #182c3a;
+  --muted: #506572;
+  --surface: #ffffff;
+  --workspace: #edf2f5;
+  --divider: #d5dfe5;
+  --control-border: #8296a2;
+  --hover: #eef4f7;
+  --accent: #146966;
+  --accent-strong: #0f5553;
+  --accent-soft: #dbf2ed;
+  --focus: #176ca3;
+  --control-radius: 0.5rem;
+  --panel-radius: 0.8rem;
+  --surface-shadow: 0 12px 32px #1733441c, 0 2px 5px #1733440d;
 }
-* { box-sizing: border-box; }
-[hidden] { display: none !important; }
-body { margin: 0; height: 100dvh; display: grid; grid-template-rows: auto 1fr auto; }
-button, input, select { font: inherit; }
-button, select { background: var(--panel); border: 1px solid var(--border); box-shadow: var(--raised); padding: .28rem .6rem; color: inherit; }
-button:enabled { cursor: pointer; }
-button:enabled:hover, summary:hover, .menu a:hover { background: #e3e8dd; }
-button[aria-pressed="true"] { background: #abb9a3; box-shadow: inset 1px 1px 0 #626d5d; }
-:focus-visible { outline: 2px solid #24522d; outline-offset: 1px; }
-.titlebar { background: #405944; color: #fff; padding: .38rem .75rem; }
-nav { display: flex; align-items: center; padding-inline: .4rem; border-bottom: 1px solid var(--border); background: var(--panel); }
-nav > details { position: relative; }
-nav > details:last-child { margin-left: auto; }
-summary { list-style: none; user-select: none; cursor: pointer; padding: .42rem .85rem; }
-summary::-webkit-details-marker { display: none; }
-details[open] summary { box-shadow: inset 1px 1px 0 var(--border); }
-.menu { position: absolute; z-index: 2; min-width: 12rem; border: 1px solid var(--border); padding: .2rem; box-shadow: 3px 4px 7px #0004; background: var(--panel); }
-details:last-child .menu { right: 0; }
-.menu button, .menu a { background: transparent; box-shadow: none; border: 0; display: block; text-align: left; width: 100%; white-space: nowrap; padding: .38rem .7rem; }
-.menu a { color: inherit; text-decoration: none; }
-.menu hr { margin: .15rem .4rem; border: 0; border-top: 1px solid var(--border); }
-.locator { display: flex; align-items: center; gap: 1rem; padding: .3rem .6rem; border-bottom: 1px solid var(--border); background: var(--panel); }
-.locator output { font-family: monospace; }
-main { min-height: 0; display: flex; }
-aside { flex: 0 0 54px; display: flex; flex-direction: column; gap: .35rem; padding: .4rem; border-right: 1px solid var(--border); background: var(--panel); }
-aside button { padding-inline: .2rem; }
-.arrows { display: grid; grid-template-columns: repeat(2, 1fr); gap: .2rem; }
-#workspace { min-width: 0; overflow: auto; flex: 1; display: flex; flex-direction: column; align-items: center; background: #a6a99e; padding: .9rem; }
-#canvas { position: relative; width: min(100%, calc((100dvh - 8.8rem) * var(--page-ratio, 1.294))); background: white; box-shadow: 0 0 0 1px #6d7066, 2px 3px 8px #0004; line-height: 0; }
-#plot { display: block; width: 100%; height: auto; user-select: none; }
-#canvas.zoom { cursor: crosshair; touch-action: none; }
-#rubber-band { position: absolute; border: 1px dashed #21421b; background: #65a45625; pointer-events: none; }
-#diagnostic-banner { padding: .45rem .6rem; margin-bottom: .65rem; background: #fff1bf; width: 100%; }
-footer { border-top: 1px solid var(--border); background: var(--panel); padding: .35rem .65rem; }
-dialog { color: inherit; min-width: min(25rem, 90vw); max-width: min(42rem, 90vw); max-height: 85dvh; padding: 0; border: 1px solid var(--border); background: var(--panel); box-shadow: 4px 6px 14px #0007; }
-dialog::backdrop { background: #2224; }
-dialog h2 { font-size: 1rem; margin: 0; padding: .45rem .65rem; background: #405944; color: #fff; }
-dialog form { padding: .75rem; }
-#dialog-content { display: grid; gap: .6rem; }
-#dialog-content label { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); align-items: center; gap: .6rem; }
-input:not([type="checkbox"], [type="file"]) { width: 100%; min-width: 0; padding: .32rem; border: 1px solid var(--border); }
-.dialog-buttons { margin-top: 1rem; display: flex; justify-content: flex-end; gap: .4rem; }
-#dialog-error { color: #8b220e; }
-@media (max-width: 520px) {
-	summary { padding-inline: .45rem; }
-	aside { flex-basis: 44px; }
-	#workspace { padding: .5rem; }
+
+* {
+  box-sizing: border-box;
 }
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  block-size: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button,
+select,
+input:not([type="checkbox"], [type="file"]) {
+  min-block-size: 2.5rem;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+  padding: 0.35rem 0.7rem;
+}
+
+button {
+  font-weight: 600;
+}
+
+button:enabled,
+summary {
+  cursor: pointer;
+}
+
+button:enabled:hover,
+summary:hover,
+.menu a:hover {
+  background: var(--hover);
+}
+
+button:disabled {
+  color: var(--muted);
+  background: #f3f6f8;
+  border-color: var(--divider);
+}
+
+button[aria-pressed="true"]:enabled {
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+header {
+  background: var(--surface);
+}
+
+.titlebar {
+  background: #183648;
+  color: #f4fbfd;
+  padding: 0.7rem 1rem;
+  overflow-wrap: anywhere;
+}
+
+.titlebar strong {
+  font-size: 1.1em;
+  font-weight: 650;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.4rem 0.75rem;
+}
+
+nav > details {
+  position: relative;
+}
+
+nav > details:last-child {
+  margin-inline-start: auto;
+}
+
+summary {
+  display: grid;
+  align-items: center;
+  min-block-size: 2.5rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--control-radius);
+  font-weight: 600;
+  list-style: none;
+  user-select: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+details[open] summary {
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+}
+
+.menu {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  z-index: 2;
+  inline-size: max-content;
+  min-inline-size: 13rem;
+  max-inline-size: min(20rem, calc(100vw - 1rem));
+  margin-block-start: 0.25rem;
+  padding: 0.35rem;
+  background: var(--surface);
+  border: 1px solid var(--divider);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--surface-shadow);
+}
+
+details:last-child .menu {
+  inset-inline: auto 0;
+}
+
+.menu button,
+.menu a {
+  display: flex;
+  align-items: center;
+  min-block-size: 2.5rem;
+  inline-size: 100%;
+  padding: 0.4rem 0.65rem;
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.menu button:disabled {
+  color: var(--muted);
+  opacity: 0.65;
+}
+
+.menu hr {
+  margin: 0.25rem 0.4rem;
+  border: 0;
+  border-block-start: 1px solid var(--divider);
+}
+
+.locator {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  padding: 0.5rem 1rem;
+  border-block: 1px solid var(--divider);
+  color: var(--muted);
+}
+
+.locator select {
+  margin-inline-start: 0.3rem;
+  padding-inline: 0.5rem;
+  color: var(--ink);
+}
+
+.locator output {
+  font-family: ui-monospace, monospace;
+  overflow-wrap: anywhere;
+}
+
+main {
+  display: flex;
+  min-block-size: 0;
+}
+
+#toolbar {
+  display: flex;
+  flex: 0 0 7.5rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: auto;
+  padding: 0.75rem;
+  border-inline-end: 1px solid var(--divider);
+  background: var(--surface);
+}
+
+.toolbar-group,
+.arrows {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.toolbar-group + .toolbar-group,
+.arrows {
+  padding-block-start: 0.75rem;
+  border-block-start: 1px solid var(--divider);
+}
+
+#toolbar button {
+  min-inline-size: 0;
+  padding-inline: 0.25rem;
+}
+
+.arrows {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#workspace {
+  container-type: size;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  min-inline-size: 0;
+  overflow: auto;
+  padding: clamp(0.65rem, 2vw, 1.5rem);
+  background: var(--workspace);
+}
+
+#canvas {
+  position: relative;
+  flex: 0 0 auto;
+  inline-size: min(100%, calc(100cqh * var(--page-ratio, 1.294)));
+  background: white;
+  box-shadow:
+    0 0 0 1px var(--divider),
+    var(--surface-shadow);
+}
+
+#plot {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  user-select: none;
+}
+
+#canvas.zoom {
+  cursor: crosshair;
+  touch-action: none;
+}
+
+#rubber-band {
+  position: absolute;
+  border: 1px dashed var(--accent-strong);
+  background: #14696626;
+  pointer-events: none;
+}
+
+#diagnostic-banner {
+  inline-size: 100%;
+  margin-block-end: 0.75rem;
+  padding: 0.65rem;
+  border: 1px solid #a77e34;
+  border-radius: var(--control-radius);
+  background: #fff5df;
+  color: #594222;
+}
+
+#diagnostic-banner button {
+  margin: 0.2rem;
+}
+
+footer {
+  padding: 0.5rem 1rem;
+  border-block-start: 1px solid var(--divider);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+}
+
+dialog {
+  inline-size: min(30rem, calc(100% - 1.5rem));
+  max-block-size: calc(100dvh - 1.5rem);
+  padding: 0;
+  border: 1px solid var(--divider);
+  border-radius: var(--panel-radius);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: var(--surface-shadow);
+}
+
+dialog::backdrop {
+  background: #122c4270;
+}
+
+dialog h2 {
+  margin: 0;
+  padding: 0.85rem 1.1rem;
+  border-block-end: 1px solid var(--divider);
+  background: #f6fafb;
+  font-size: 1.18em;
+}
+
+dialog form {
+  padding: 1rem 1.1rem;
+}
+
+#dialog-content {
+  display: grid;
+  gap: 0.7rem;
+}
+
+#dialog-content label {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 1fr) minmax(0, 2fr);
+  align-items: center;
+  gap: 0.6rem;
+}
+
+input:not([type="checkbox"], [type="file"]),
+#dialog-content select {
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.dialog-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  margin-block-start: 1rem;
+  padding-block-start: 0.85rem;
+  border-block-start: 1px solid var(--divider);
+}
+
+.dialog-buttons button[value="accept"]:enabled {
+  color: white;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.dialog-buttons button[value="accept"]:enabled:hover {
+  background: var(--accent-strong);
+}
+
+#dialog-error {
+  color: #8b220e;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  button,
+  summary,
+  .menu a {
+    transition:
+      background-color 120ms ease-out,
+      border-color 120ms ease-out;
+  }
+}
+
+@media (max-width: 42rem) {
+  nav {
+    position: relative;
+    gap: 0.15rem;
+    padding-inline: 0.5rem;
+  }
+
+  nav > details {
+    position: static;
+  }
+
+  nav > details:last-child {
+    margin-inline-start: 0;
+  }
+
+  summary {
+    padding-inline: 0.5rem;
+  }
+
+  .menu,
+  details:last-child .menu {
+    inset-inline: 0.5rem auto;
+  }
+
+  main {
+    flex-direction: column;
+  }
+
+  #toolbar {
+    flex: 0 0 auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.65rem;
+    padding: 0.55rem 0.75rem;
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--divider);
+  }
+
+  .toolbar-group,
+  .arrows {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    border: 0;
+  }
+
+  .toolbar-group + .toolbar-group,
+  .arrows {
+    padding-block-start: 0;
+    border-block-start: 0;
+  }
+
+  #toolbar button {
+    min-inline-size: 2.5rem;
+    padding-inline: 0.4rem;
+  }
+}
+
 @media print {
-	body, main, #workspace { display: block; height: auto; margin: 0; padding: 0; background: white; }
-	header, aside, footer, #diagnostic-banner, dialog { display: none !important; }
-	#canvas { box-shadow: none; width: 100%; }
+  body,
+  main,
+  #workspace {
+    display: block;
+    block-size: auto;
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+
+  header,
+  #toolbar,
+  footer,
+  #diagnostic-banner,
+  dialog {
+    display: none !important;
+  }
+
+  #workspace {
+    container-type: normal;
+    overflow: visible;
+  }
+
+  #canvas {
+    inline-size: 100%;
+    box-shadow: none;
+  }
 }

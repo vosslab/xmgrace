@@ -1,9 +1,14 @@
 ## 2026-11-22
 
+### Behavior or Interface Changes
+
+- Modernized the browser controls and dialogs, with a wrapping toolbar on narrow screens.
+
 ### Fixes and Maintenance
 
 - Removed the inherited desktop C build, vendored libraries, and bundled manuals.
 - Made the web app own its blank projects and editable examples while preserving AGR interoperability.
+- Linked the live GitHub Pages app in the README and refreshed the screenshot.
 
 ## 2026-11-21
 

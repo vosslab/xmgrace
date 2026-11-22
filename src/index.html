@@ -10,7 +10,7 @@
 	<header>
 		<div class="titlebar"><strong id="project-title">Grace</strong></div>
 		<nav aria-label="Grace menus">
-			<details><summary><u>F</u>ile</summary><div class="menu">
+			<details><summary>File</summary><div class="menu">
 				<button data-action="new">New</button>
 				<button data-action="open">Open...</button>
 				<button data-action="save" data-edit>Save</button>
@@ -20,30 +20,30 @@
 				<button data-action="print-setup" data-edit>Print setup...</button>
 				<button data-action="print" data-edit>Print</button>
 			</div></details>
-			<details><summary><u>E</u>dit</summary><div class="menu">
+			<details><summary>Edit</summary><div class="menu">
 				<button data-action="sets">Data sets...</button>
 				<button data-action="autoscale-dialog" data-edit>Autoscale graphs...</button>
 			</div></details>
-			<details><summary><u>D</u>ata</summary><div class="menu">
+			<details><summary>Data</summary><div class="menu">
 				<button data-action="import" data-edit>Import ASCII...</button>
 				<button data-action="svg" data-edit>Export SVG...</button>
 			</div></details>
-			<details><summary><u>P</u>lot</summary><div class="menu">
+			<details><summary>Plot</summary><div class="menu">
 				<button data-action="graph" data-edit>Graph appearance...</button>
 				<button data-action="set" data-edit>Set appearance...</button>
 				<button data-action="axis" data-edit>Axis properties...</button>
 			</div></details>
-			<details><summary><u>V</u>iew</summary><div class="menu">
+			<details><summary>View</summary><div class="menu">
 				<button data-action="locator">Show/hide locator bar</button>
 				<button data-action="status">Show/hide status bar</button>
 				<button data-action="toolbar">Show/hide tool bar</button>
 				<button data-action="redraw">Redraw</button>
 			</div></details>
-			<details><summary><u>W</u>indow</summary><div class="menu">
+			<details><summary>Window</summary><div class="menu">
 				<button data-action="graphs">Graphs...</button>
 				<button data-action="diagnostics">Console...</button>
 			</div></details>
-			<details><summary><u>H</u>elp</summary><div class="menu">
+			<details><summary>Help</summary><div class="menu">
 				<a href="https://github.com/vosslab/xmgrace/blob/main/README.md#make-the-cooling-plot" target="_blank" rel="noopener">Browser guide</a>
 				<a href="https://plasma-gate.weizmann.ac.il/Grace/doc/UsersGuide.html" target="_blank" rel="noopener">Desktop reference</a>
 				<button data-action="examples">Examples...</button>
@@ -59,13 +59,17 @@
 	</header>
 	<main>
 		<aside id="toolbar" aria-label="Grace toolbar">
-			<button data-action="draw" title="Redraw">Draw</button>
-			<button data-action="zoom" data-edit title="Zoom to a region" aria-pressed="false">Z</button>
-			<button data-action="zoom-in" data-edit title="Zoom in">+</button>
-			<button data-action="zoom-out" data-edit title="Zoom out">&minus;</button>
-			<button data-action="autoscale" data-edit title="Autoscale both axes">AS</button>
-			<button data-action="autoscale-x" data-edit title="Autoscale X axis">AX</button>
-			<button data-action="autoscale-y" data-edit title="Autoscale Y axis">AY</button>
+			<div class="toolbar-group">
+				<button data-action="draw">Redraw</button>
+				<button data-action="zoom" data-edit title="Zoom to a region" aria-pressed="false">Zoom area</button>
+				<button data-action="zoom-in" data-edit title="Zoom in" aria-label="Zoom in">+</button>
+				<button data-action="zoom-out" data-edit title="Zoom out" aria-label="Zoom out">&minus;</button>
+			</div>
+			<div class="toolbar-group">
+				<button data-action="autoscale" data-edit title="Autoscale both axes">Autoscale</button>
+				<button data-action="autoscale-x" data-edit title="Autoscale X axis">Fit X</button>
+				<button data-action="autoscale-y" data-edit title="Autoscale Y axis">Fit Y</button>
+			</div>
 			<div class="arrows">
 				<button data-action="left" data-edit aria-label="Scroll left">&larr;</button>
 				<button data-action="right" data-edit aria-label="Scroll right">&rarr;</button>

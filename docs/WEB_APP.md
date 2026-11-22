@@ -29,7 +29,7 @@ After building, run `npm run test:playwright` to test the production files under
 | Load existing projects | Multi-graph XY, common symbols and line styles, symmetric and asymmetric XY error bars, and older page and range declarations |
 | Save and print | Download an editable AGR or vector SVG, or print through the browser |
 | Unsupported settings or graph types | Read-only partial preview with diagnostics and access to the original file |
-| Further porting | Classic dialog and shortcut parity, Grace text escapes and font metrics, advanced graphs and axes, data editing, transformations, fitting, the command window, and additional hardcopy formats |
+| Further porting | Classic dialog and shortcut parity, Grace text escapes and font metrics, advanced graphs and axes, data editing, FFT and other transformations, fitting, the command window, and additional hardcopy formats |
 
 SVG layout and formatting still need detailed visual comparison with native Grace. The
 desktop program remains the reference for plotting and numerical behavior.

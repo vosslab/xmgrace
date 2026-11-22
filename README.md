@@ -3,6 +3,8 @@
 A scientific plotting app for researchers, instructors, and students who want to make XY plots in
 the browser, edit them with the classic Grace controls, and save projects that desktop Grace can open.
 
+[Open Grace in your browser](https://vosslab.github.io/xmgrace/)
+
 The TypeScript and Rust/WebAssembly browser port is in development. It supports an editable XY
 workflow, including linear and logarithmic axes, symbols, line styles, and SVG export. Projects
 with unsupported Grace settings open as read-only previews with diagnostics. See the
