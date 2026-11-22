@@ -11,7 +11,7 @@ crate-type = ["rlib", "cdylib"]
 
 [dependencies]
 serde = { version = "*", features = ["derive"] }
+serde_json = "*"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-serde_json = "*"
 wasm-bindgen = "*"

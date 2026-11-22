@@ -18,6 +18,7 @@ rm -rf dist
 ./node_modules/.bin/esbuild src/main.ts src/web/worker.ts \
 	--bundle \
 	--format=esm \
+	--splitting \
 	--target=es2020 \
 	--platform=browser \
 	--loader:.agr=text \

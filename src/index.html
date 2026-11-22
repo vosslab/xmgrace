@@ -1,102 +1,303 @@
 <!doctype html>
 <html lang="en">
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Grace</title>
-	<link rel="stylesheet" href="./style.css">
-</head>
-<body>
-	<header>
-		<div class="titlebar"><strong id="project-title">Grace</strong></div>
-		<nav aria-label="Grace menus">
-			<details><summary>File</summary><div class="menu">
-				<button data-action="new">New</button>
-				<button data-action="open">Open...</button>
-				<button data-action="save" data-edit>Save</button>
-				<button data-action="save-as" data-edit>Save as...</button>
-				<button data-action="revert">Revert to saved</button>
-				<hr>
-				<button data-action="print-setup" data-edit>Print setup...</button>
-				<button data-action="print" data-edit>Print</button>
-			</div></details>
-			<details><summary>Edit</summary><div class="menu">
-				<button data-action="sets">Data sets...</button>
-				<button data-action="autoscale-dialog" data-edit>Autoscale graphs...</button>
-			</div></details>
-			<details><summary>Data</summary><div class="menu">
-				<button data-action="import" data-edit>Import ASCII...</button>
-				<button data-action="svg" data-edit>Export SVG...</button>
-			</div></details>
-			<details><summary>Plot</summary><div class="menu">
-				<button data-action="graph" data-edit>Graph appearance...</button>
-				<button data-action="set" data-edit>Set appearance...</button>
-				<button data-action="axis" data-edit>Axis properties...</button>
-			</div></details>
-			<details><summary>View</summary><div class="menu">
-				<button data-action="locator">Show/hide locator bar</button>
-				<button data-action="status">Show/hide status bar</button>
-				<button data-action="toolbar">Show/hide tool bar</button>
-				<button data-action="redraw">Redraw</button>
-			</div></details>
-			<details><summary>Window</summary><div class="menu">
-				<button data-action="graphs">Graphs...</button>
-				<button data-action="diagnostics">Console...</button>
-			</div></details>
-			<details><summary>Help</summary><div class="menu">
-				<a href="https://github.com/vosslab/xmgrace/blob/main/README.md#make-the-cooling-plot" target="_blank" rel="noopener">Browser guide</a>
-				<a href="https://plasma-gate.weizmann.ac.il/Grace/doc/UsersGuide.html" target="_blank" rel="noopener">Desktop reference</a>
-				<button data-action="examples">Examples...</button>
-				<a href="./LICENSE.GPL-2.0-or-later" target="_blank" rel="noopener">License terms</a>
-				<a href="https://github.com/vosslab/xmgrace" target="_blank" rel="noopener">Source code</a>
-				<button data-action="about">About Grace...</button>
-			</div></details>
-		</nav>
-		<div class="locator" id="locator-bar">
-			<label>Graph <select id="graph-select" aria-label="Active graph"></select></label>
-			<output id="locator">G0: X, Y</output>
-		</div>
-	</header>
-	<main>
-		<aside id="toolbar" aria-label="Grace toolbar">
-			<div class="toolbar-group">
-				<button data-action="draw">Redraw</button>
-				<button data-action="zoom" data-edit title="Zoom to a region" aria-pressed="false">Zoom area</button>
-				<button data-action="zoom-in" data-edit title="Zoom in" aria-label="Zoom in">+</button>
-				<button data-action="zoom-out" data-edit title="Zoom out" aria-label="Zoom out">&minus;</button>
-			</div>
-			<div class="toolbar-group">
-				<button data-action="autoscale" data-edit title="Autoscale both axes">Autoscale</button>
-				<button data-action="autoscale-x" data-edit title="Autoscale X axis">Fit X</button>
-				<button data-action="autoscale-y" data-edit title="Autoscale Y axis">Fit Y</button>
-			</div>
-			<div class="arrows">
-				<button data-action="left" data-edit aria-label="Scroll left">&larr;</button>
-				<button data-action="right" data-edit aria-label="Scroll right">&rarr;</button>
-				<button data-action="up" data-edit aria-label="Scroll up">&uarr;</button>
-				<button data-action="down" data-edit aria-label="Scroll down">&darr;</button>
-			</div>
-		</aside>
-		<section id="workspace" aria-label="Plot workspace">
-			<div id="diagnostic-banner" hidden><strong>Read-only preview.</strong> <button data-action="diagnostics">View diagnostics...</button> <button data-action="original">Download original</button></div>
-			<div id="canvas"><img id="plot" alt="Grace project plot" draggable="false"><div id="rubber-band" hidden></div></div>
-		</section>
-	</main>
-	<footer id="status-bar" role="status">Loading Grace...</footer>
-	<input id="project-file" type="file" accept=".agr" hidden>
-	<input id="data-file" type="file" accept=".dat,.txt,.csv,.tsv" hidden>
-	<dialog id="properties" aria-labelledby="dialog-title">
-		<h2 id="dialog-title"></h2>
-		<form id="dialog-form">
-			<div id="dialog-content"></div>
-			<p id="dialog-error" role="alert" hidden></p>
-			<div class="dialog-buttons">
-				<button type="submit" value="accept">Accept</button>
-				<button type="submit" value="apply">Apply</button>
-				<button type="button" data-action="close">Close</button>
-			</div>
-		</form>
-	</dialog>
-	<script type="module" src="./main.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Grace</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="titlebar"><strong id="project-title">Grace</strong></div>
+      <nav aria-label="Grace menus">
+        <details>
+          <summary accesskey="f">
+            <span><u>F</u>ile</span>
+          </summary>
+          <div class="menu">
+            <button data-action="new">New</button>
+            <button data-action="open">Open...</button>
+            <button data-action="save" data-edit>Save</button>
+            <button data-action="save-as" data-edit>Save as...</button>
+            <button data-action="revert">Revert to saved</button>
+            <hr />
+            <button data-action="print-setup" data-edit>Print setup...</button>
+            <button data-action="print" data-edit>Print</button>
+            <hr />
+            <button data-action="exit">Exit</button>
+          </div>
+        </details>
+        <details>
+          <summary accesskey="e">
+            <span><u>E</u>dit</span>
+          </summary>
+          <div class="menu">
+            <button data-action="sets">Data sets...</button>
+            <button data-action="set-operations" data-edit>Set operations...</button>
+            <hr />
+            <button data-action="arrange-graphs" data-edit>Arrange graphs...</button>
+            <button data-action="overlay-graphs" data-edit>Overlay graphs...</button>
+            <button data-action="autoscale-dialog" data-edit>Autoscale graphs...</button>
+            <hr />
+            <details class="menu-nested">
+              <summary>Regions</summary>
+              <div class="menu">
+                <button data-action="region-status">Status...</button>
+                <button data-action="region-define" data-edit>Define...</button>
+                <button data-action="region-clear" data-edit>Clear...</button>
+                <hr />
+                <button data-action="region-report">Report on...</button>
+              </div>
+            </details>
+            <button data-action="reload-data" data-edit>Hot links...</button>
+            <hr />
+            <button data-action="locator-set-fixed">Set locator fixed point</button>
+            <button data-action="locator-clear-fixed">Clear locator fixed point</button>
+            <button data-action="locator-properties">Locator props...</button>
+            <hr />
+            <button data-action="preferences">Preferences...</button>
+          </div>
+        </details>
+        <details>
+          <summary accesskey="d">
+            <span><u>D</u>ata</span>
+          </summary>
+          <div class="menu">
+            <button data-action="data-operations" data-edit>Data set operations...</button>
+            <details class="menu-nested">
+              <summary>Transformations</summary>
+              <div class="menu">
+                <button data-action="evaluate" data-edit>Evaluate expression...</button>
+                <hr />
+                <button data-action="histogram" data-edit>Histograms...</button>
+                <button data-action="fourier" data-edit>Fourier transforms...</button>
+                <hr />
+                <button data-action="running" data-edit>Running averages...</button>
+                <button data-action="difference" data-edit>Differences...</button>
+                <button data-action="seasonal-difference" data-edit>Seasonal differences...</button>
+                <button data-action="integration" data-edit>Integration...</button>
+                <hr />
+                <button data-action="interpolation" data-edit>Interpolation/splines...</button>
+                <button data-action="regression" data-edit>Regression...</button>
+                <button data-action="nonlinear-fit" data-edit>Non-linear curve fitting...</button>
+                <hr />
+                <button data-action="correlation" data-edit>Correlation/covariance...</button>
+                <button data-action="digital-filter" data-edit>Digital filter...</button>
+                <button data-action="convolution" data-edit>Linear convolution...</button>
+                <hr />
+                <button data-action="geometric" data-edit>Geometric transforms...</button>
+                <hr />
+                <button data-action="sampling" data-edit>Sample points...</button>
+                <button data-action="pruning" data-edit>Prune data...</button>
+              </div>
+            </details>
+            <button data-action="feature-extraction" data-edit>Feature extraction...</button>
+            <hr />
+            <details class="menu-nested">
+              <summary>Import</summary>
+              <div class="menu">
+                <button data-action="import" data-edit>ASCII...</button>
+                <button data-action="import-netcdf" data-edit>NetCDF...</button>
+                <button data-action="import-table" data-edit>Table...</button>
+              </div>
+            </details>
+            <details class="menu-nested">
+              <summary>Export</summary>
+              <div class="menu">
+                <button data-action="export-ascii" data-edit>ASCII...</button>
+                <button data-action="svg" data-edit>SVG...</button>
+                <button data-action="png" data-edit>PNG...</button>
+                <button data-action="jpeg" data-edit>JPEG...</button>
+                <button data-action="pdf" data-edit>PDF...</button>
+              </div>
+            </details>
+          </div>
+        </details>
+        <details>
+          <summary accesskey="p">
+            <span><u>P</u>lot</span>
+          </summary>
+          <div class="menu">
+            <button data-action="page-setup" data-edit>Plot appearance...</button>
+            <button data-action="graph" data-edit>Graph appearance...</button>
+            <button data-action="set" data-edit>Set appearance...</button>
+            <button data-action="axis" data-edit>Axis properties...</button>
+            <hr />
+            <button data-action="load-parameters" data-edit>Load parameters...</button>
+            <button data-action="save-parameters" data-edit>Save parameters...</button>
+          </div>
+        </details>
+        <details>
+          <summary accesskey="v">
+            <span><u>V</u>iew</span>
+          </summary>
+          <div class="menu">
+            <button data-action="locator" aria-pressed="true">Show locator bar</button>
+            <button data-action="status" aria-pressed="true">Show status bar</button>
+            <button data-action="toolbar" aria-pressed="true">Show tool bar</button>
+            <hr />
+            <button data-action="page-setup" data-edit>Page setup...</button>
+            <hr />
+            <button data-action="redraw">Redraw</button>
+            <hr />
+            <button data-action="redraw">Update all</button>
+          </div>
+        </details>
+        <details>
+          <summary accesskey="w">
+            <span><u>W</u>indow</span>
+          </summary>
+          <div class="menu">
+            <button data-action="commands" data-edit>Commands</button>
+            <button data-action="point-explorer">Point explorer</button>
+            <button data-action="drawing-objects" data-edit>Drawing objects</button>
+            <button data-action="font-tool">Font tool</button>
+            <button data-action="diagnostics">Console</button>
+            <hr />
+            <button data-action="manage-graphs" data-edit>Graphs...</button>
+          </div>
+        </details>
+        <details>
+          <summary accesskey="h">
+            <span><u>H</u>elp</span>
+          </summary>
+          <div class="menu">
+            <a
+              href="https://plasma-gate.weizmann.ac.il/Grace/doc/UsersGuide.html"
+              target="_blank"
+              rel="noopener"
+              >User's Guide</a
+            >
+            <a
+              href="https://plasma-gate.weizmann.ac.il/Grace/doc/Tutorial.html"
+              target="_blank"
+              rel="noopener"
+              >Tutorial</a
+            >
+            <a
+              href="https://plasma-gate.weizmann.ac.il/Grace/doc/FAQ.html"
+              target="_blank"
+              rel="noopener"
+              >FAQ</a
+            >
+            <a
+              href="https://plasma-gate.weizmann.ac.il/Grace/doc/CHANGES.html"
+              target="_blank"
+              rel="noopener"
+              >Changes</a
+            >
+            <hr />
+            <button data-action="examples">Examples</button>
+            <button data-action="about">About...</button>
+            <hr />
+            <a
+              href="https://github.com/vosslab/xmgrace/blob/main/README.md#make-the-cooling-plot"
+              target="_blank"
+              rel="noopener"
+              >Browser guide</a
+            >
+            <a href="./LICENSE.GPL-2.0-or-later" target="_blank" rel="noopener">License terms</a>
+            <a href="https://github.com/vosslab/xmgrace" target="_blank" rel="noopener"
+              >Source code</a
+            >
+          </div>
+        </details>
+      </nav>
+      <div class="locator" id="locator-bar">
+        <label
+          >Graph
+          <select id="graph-select" aria-label="Active graph"></select
+        ></label>
+        <output id="locator">G0: X, Y</output>
+      </div>
+    </header>
+    <main>
+      <aside id="toolbar" aria-label="Grace toolbar">
+        <div class="toolbar-group">
+          <button data-action="draw">Draw</button>
+        </div>
+        <div class="toolbar-group toolbar-pairs">
+          <button data-action="zoom" data-edit title="Zoom to a region" aria-pressed="false">
+            Z
+          </button>
+          <button data-action="autoscale" data-edit title="Autoscale both axes">AS</button>
+          <button data-action="zoom-in" data-edit title="Zoom in" aria-label="Zoom in">+</button>
+          <button data-action="zoom-out" data-edit title="Zoom out" aria-label="Zoom out">
+            &minus;
+          </button>
+          <button data-action="left" data-edit aria-label="Scroll left">&larr;</button>
+          <button data-action="right" data-edit aria-label="Scroll right">&rarr;</button>
+          <button data-action="down" data-edit aria-label="Scroll down">&darr;</button>
+          <button data-action="up" data-edit aria-label="Scroll up">&uarr;</button>
+        </div>
+        <div class="toolbar-group">
+          <button data-action="auto-ticks" data-edit title="Automatic ticks">AutoT</button>
+          <button
+            data-action="auto-on"
+            data-edit
+            title="Autoscale on a selected set"
+            aria-pressed="false"
+          >
+            AutoO
+          </button>
+        </div>
+        <div class="toolbar-group toolbar-pairs">
+          <button data-action="zoom-x" data-edit title="Zoom X axis only" aria-pressed="false">
+            ZX
+          </button>
+          <button data-action="zoom-y" data-edit title="Zoom Y axis only" aria-pressed="false">
+            ZY
+          </button>
+          <button data-action="autoscale-x" data-edit title="Autoscale X axis">AX</button>
+          <button data-action="autoscale-y" data-edit title="Autoscale Y axis">AY</button>
+          <button
+            data-action="world-push-zoom"
+            data-edit
+            title="Push world and zoom"
+            aria-pressed="false"
+          >
+            PZ
+          </button>
+          <button data-action="world-push" data-edit title="Push world">Pu</button>
+          <button data-action="world-pop" data-edit title="Pop world">Po</button>
+          <button data-action="world-cycle" data-edit title="Cycle world stack">Cy</button>
+        </div>
+        <output id="world-stack" aria-label="World stack"></output>
+        <div class="toolbar-group">
+          <button data-action="exit" title="Close the current project">Exit</button>
+        </div>
+      </aside>
+      <section id="workspace" aria-label="Plot workspace">
+        <div id="diagnostic-banner" hidden>
+          <strong>Read-only preview.</strong>
+          <button data-action="diagnostics">View diagnostics...</button>
+          <button data-action="original">Download original</button>
+        </div>
+        <div id="canvas" tabindex="0" aria-label="Plot canvas">
+          <img id="plot" alt="Grace project plot" draggable="false" />
+          <div id="rubber-band" hidden></div>
+        </div>
+      </section>
+    </main>
+    <footer id="status-bar" role="status">Loading Grace...</footer>
+    <input id="project-file" type="file" accept=".agr" hidden />
+    <input id="data-file" type="file" accept=".dat,.txt,.csv,.tsv" hidden />
+    <input id="table-file" type="file" accept=".dat,.txt,.csv,.tsv" hidden />
+    <input id="reload-file" type="file" accept=".dat,.txt,.csv,.tsv" hidden />
+    <input id="netcdf-file" type="file" accept=".nc,.cdf,.netcdf" hidden />
+    <input id="parameters-file" type="file" accept=".par,.txt" hidden />
+    <dialog id="properties" aria-labelledby="dialog-title">
+      <h2 id="dialog-title"></h2>
+      <form id="dialog-form">
+        <div id="dialog-content"></div>
+        <p id="dialog-error" role="alert" hidden></p>
+        <div class="dialog-buttons">
+          <button type="submit" value="accept">Accept</button>
+          <button type="submit" value="apply">Apply</button>
+          <button type="button" data-action="close">Close</button>
+        </div>
+      </form>
+    </dialog>
+    <script type="module" src="./main.js"></script>
+  </body>
 </html>

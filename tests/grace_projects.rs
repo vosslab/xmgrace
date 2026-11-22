@@ -41,7 +41,8 @@ fn agr_import_preserves_a_declared_nonzero_graph_id() {
 
 #[test]
 fn preview_never_serializes_an_unsupported_project() {
-    let project = open(b"@version 50125\n@g0 type polar\n@with g0\n").expect("open preview");
+    let project =
+        open(b"@version 50125\n@g0 type UnsupportedGraphType\n@with g0\n").expect("open preview");
     assert_eq!(project.diagnostics[0].line, Some(2));
     assert!(save(&project).is_err());
 }

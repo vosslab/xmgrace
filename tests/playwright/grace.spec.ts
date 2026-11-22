@@ -1,4 +1,5 @@
 import { Buffer } from "node:buffer";
+import { readFile } from "node:fs/promises";
 
 import { expect, test } from "@playwright/test";
 
@@ -40,7 +41,7 @@ test("unsupported Grace projects retain the original and disable export", async 
   await page.locator("#project-file").setInputFiles({
     name: "future.agr",
     mimeType: "text/plain",
-    buffer: Buffer.from("@version 50125\n@g0 type Polar\n@with g0\n"),
+    buffer: Buffer.from("@version 50125\n@g0 type UnsupportedGraphType\n@with g0\n"),
   });
   await expect(page.getByText("Read-only preview.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Download original" })).toBeVisible();
@@ -48,8 +49,62 @@ test("unsupported Grace projects retain the original and disable export", async 
   await expect(page.getByRole("button", { name: "Save", exact: true })).toBeDisabled();
   await page.getByRole("button", { name: "View diagnostics..." }).click();
   await expect(page.getByRole("dialog")).toContainText(
-    "Line 2: Unsupported Grace setting: g0 type Polar",
+    "Line 2: Unsupported Grace setting: g0 type UnsupportedGraphType",
   );
+});
+
+test("classic toolbar labels and formula FFT workflow survive an AGR round trip", async ({
+  page,
+}, testInfo) => {
+  await page.goto("./");
+  const toolbar = page.getByLabel("Grace toolbar");
+  await expect(toolbar).toContainText("Draw");
+  await expect(toolbar).toContainText("Z");
+  await expect(toolbar).toContainText("AS");
+  await expect(toolbar).toContainText("AX");
+  await expect(toolbar).toContainText("AY");
+
+  await page.getByText("Edit", { exact: true }).click();
+  await page.getByRole("button", { name: "Data sets..." }).click();
+  await page.getByText("Create new", { exact: true }).click();
+  await page.getByRole("button", { name: "By formula..." }).click();
+  const formula = page.getByRole("dialog");
+  await formula.getByLabel("Stop", { exact: true }).fill("2*pi*(127/128)");
+  await formula.getByLabel("Points", { exact: true }).fill("128");
+  await formula.getByLabel("Y", { exact: true }).fill("sin($t)");
+  await formula.getByRole("button", { name: "Accept" }).click();
+  await expect(page.locator("#status-bar")).toHaveText("G0  |  1 set");
+
+  await page.getByText("Data", { exact: true }).click();
+  await page.getByText("Transformations", { exact: true }).click();
+  await page.getByRole("button", { name: "Fourier transforms..." }).click();
+  const transform = page.getByRole("dialog");
+  await transform.getByRole("combobox", { name: "Algorithm", exact: true }).selectOption("fft");
+  await transform.getByRole("combobox", { name: "Load", exact: true }).selectOption("magnitude");
+  await transform.getByRole("button", { name: "Accept" }).click();
+  await expect(page.locator("#status-bar")).toHaveText("G0  |  2 sets");
+
+  await page.getByText("File", { exact: true }).click();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  const file = testInfo.outputPath("formula-fft.agr");
+  await (await download).saveAs(file);
+  const agr = await readFile(file, "utf8");
+  const spectrum = agr
+    .split("@target G0.S1\n")[1]
+    ?.split("&")[0]
+    ?.trim()
+    .split("\n")
+    .filter((line) => !line.startsWith("@"))
+    .map((line) => line.split(/\s+/).map(Number));
+  expect(spectrum).toHaveLength(64);
+  const magnitudeAt = (index: number): number => spectrum?.[index]?.[1] ?? Number.NaN;
+  expect(spectrum?.[1]?.[0]).toBe(1);
+  expect(magnitudeAt(1)).toBeCloseTo(128, 9);
+  expect(magnitudeAt(1)).toBeGreaterThan(magnitudeAt(0));
+  expect(magnitudeAt(1)).toBeGreaterThan(magnitudeAt(2));
+  await page.locator("#project-file").setInputFiles(file);
+  await expect(page.locator("#status-bar")).toHaveText("G0  |  2 sets");
 });
 
 test("the built-in examples open as editable projects", async ({ page }) => {
@@ -57,7 +112,7 @@ test("the built-in examples open as editable projects", async ({ page }) => {
   await expect(page.locator("#status-bar")).toHaveText("G0  |  0 sets");
   for (const filename of ["cooling.agr", "measurement_errors.agr"]) {
     await page.getByText("Help", { exact: true }).click();
-    await page.getByRole("button", { name: "Examples..." }).click();
+    await page.getByRole("button", { name: "Examples", exact: true }).click();
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("combobox").selectOption(filename);
     await dialog.getByRole("button", { name: "Accept" }).click();

@@ -1,12 +1,42 @@
 //! Grace project data and host-independent plot operations.
+mod advanced;
 mod agr;
+mod appearance;
+mod ascii;
+mod commands;
+mod data_commands;
+mod dataset;
+mod expression;
+mod fitting;
+mod fourier;
+mod grace_text;
+mod graph_edit;
+mod netcdf;
+mod objects;
+mod parameters;
 mod plot;
+mod plot_axes;
+mod plot_objects;
+mod plot_set_fill;
+mod plot_special;
+mod regions;
+mod scale;
+mod script;
+mod series;
+mod tick_format;
 
 use serde::Serialize;
 use std::collections::BTreeMap;
 
 pub use agr::{open, save};
 pub use plot::svg;
+
+pub fn netcdf_variables(bytes: &[u8]) -> Result<Vec<(String, usize)>, Diagnostic> {
+    Ok(netcdf::variables(bytes)?
+        .into_iter()
+        .map(|item| (item.name, item.length))
+        .collect())
+}
 
 pub type Settings = BTreeMap<String, String>;
 
@@ -32,7 +62,7 @@ impl Diagnostic {
     }
 }
 
-#[derive(Debug, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize)]
 pub struct Set {
     pub settings: Settings,
     #[serde(skip)]
@@ -41,7 +71,7 @@ pub struct Set {
     pub kind: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Graph {
     pub world: [f64; 4],
     pub view: [f64; 4],
@@ -64,17 +94,22 @@ impl Default for Graph {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Project {
     pub page: [f64; 2],
     pub graphs: BTreeMap<u32, Graph>,
     pub diagnostics: Vec<Diagnostic>,
+    pub console: Vec<String>,
+    pub(crate) objects: BTreeMap<u32, objects::DrawingObject>,
+    pub(crate) regions: BTreeMap<u32, regions::Region>,
     #[serde(skip)]
     pub colors: BTreeMap<u32, [u8; 3]>,
     #[serde(skip)]
     pub color_commands: Vec<String>,
     #[serde(skip)]
     pub timestamp: Option<String>,
+    #[serde(skip)]
+    pub(crate) reference_date: f64,
     pub background: u32,
     pub fill_page: bool,
 }
@@ -103,9 +138,13 @@ impl Project {
             page: [792., 612.],
             graphs: BTreeMap::new(),
             diagnostics: Vec::new(),
+            console: Vec::new(),
+            objects: BTreeMap::new(),
+            regions: BTreeMap::new(),
             colors: BTreeMap::new(),
             color_commands: Vec::new(),
             timestamp: None,
+            reference_date: 0.,
             background: 0,
             fill_page: true,
         }
@@ -122,10 +161,24 @@ fn value<'a>(settings: &'a Settings, key: &str, default: &'a str) -> &'a str {
 }
 
 pub fn quote(text: &str) -> String {
-    format!(
-        "\"{}\"",
-        text.replace('"', "\\\"").replace(['\r', '\n'], " ")
-    )
+    let mut quoted = String::from("\"");
+    let mut slash = false;
+    for character in text.chars() {
+        if character == '"' && !slash {
+            quoted.push('\\');
+        }
+        quoted.push(if matches!(character, '\r' | '\n') {
+            ' '
+        } else {
+            character
+        });
+        slash = !slash && character == '\\';
+    }
+    if slash {
+        quoted.push('\\');
+    }
+    quoted.push('"');
+    quoted
 }
 
 pub fn unquote(value: &str) -> &str {
@@ -168,18 +221,11 @@ pub fn import_ascii(project: &mut Project, graph: u32, bytes: &[u8]) -> Result<(
         return Err(Diagnostic::new("The file contains no XY data."));
     }
     let graph = project.graph_mut(graph)?;
-    for rows in sets {
-        let id = graph.sets.last_key_value().map_or(0, |(last, _)| last + 1);
-        graph.sets.insert(
-            id,
-            Set {
-                count: rows.len(),
-                rows,
-                kind: "xy".into(),
-                ..Set::default()
-            },
-        );
-    }
+    let sets = sets
+        .into_iter()
+        .map(dataset::xy)
+        .collect::<Result<_, _>>()?;
+    dataset::append(graph, sets)?;
     autoscale(graph, "xy");
     Ok(())
 }
@@ -204,16 +250,15 @@ impl Project {
 }
 
 pub fn set_world(graph: &mut Graph, bounds: [f64; 4]) -> Result<(), Diagnostic> {
-    if !bounds.iter().all(|v| v.is_finite())
-        || bounds[0] >= bounds[2]
-        || bounds[1] >= bounds[3]
-        || !(bounds[2] - bounds[0]).is_finite()
-        || !(bounds[3] - bounds[1]).is_finite()
-        || (value(&graph.settings, "xaxes scale", "Normal").eq_ignore_ascii_case("logarithmic")
-            && bounds[0] <= 0.)
-        || (value(&graph.settings, "yaxes scale", "Normal").eq_ignore_ascii_case("logarithmic")
-            && bounds[1] <= 0.)
-    {
+    if ["x", "y"].into_iter().enumerate().any(|(index, axis)| {
+        let scale = scale::Scale::from_settings(&graph.settings, axis);
+        let (low, high) = (bounds[index], bounds[index + 2]);
+        !scale.valid_range(low, high)
+            || scale
+                .project(low)
+                .zip(scale.project(high))
+                .is_none_or(|(a, b)| a == b || !(b - a).is_finite())
+    }) {
         return Err(Diagnostic::new(
             "World limits must increase and be valid for the axis scale.",
         ));
@@ -223,17 +268,72 @@ pub fn set_world(graph: &mut Graph, bounds: [f64; 4]) -> Result<(), Diagnostic> 
 }
 
 pub fn autoscale(graph: &mut Graph, axes: &str) {
+    autoscale_sets(graph, axes, None);
+}
+
+fn auto_ticks(graph: &mut Graph) {
+    for (axis, index) in [("x", 0), ("y", 1)] {
+        let scale = scale::Scale::from_settings(&graph.settings, axis);
+        let major = if scale.is_log() {
+            10.
+        } else {
+            plot::nice_step((graph.world[index + 2] - graph.world[index]) / 5.)
+        };
+        graph
+            .settings
+            .insert(format!("{axis}axis tick major"), major.to_string());
+    }
+}
+
+fn auto_on(graph: &mut Graph, x: f64, y: f64) -> Result<(), Diagnostic> {
+    let axis_distance = |axis: &str, index: usize, target: f64, value: f64| {
+        let scale = scale::Scale::from_settings(&graph.settings, axis);
+        let normal = |point| scale.project(point).unwrap_or(f64::NAN);
+        (normal(value) - normal(target))
+            / (normal(graph.world[index + 2]) - normal(graph.world[index]))
+    };
+    let mut closest = None;
+    let mut distance = f64::INFINITY;
+    for (&id, set) in &graph.sets {
+        if value(&set.settings, "hidden", "false") == "true" {
+            continue;
+        }
+        for row in &set.rows {
+            if let [px, py, ..] = row.as_slice() {
+                let next = axis_distance("x", 0, x, *px).hypot(axis_distance("y", 1, y, *py));
+                if next < distance {
+                    closest = Some(id);
+                    distance = next;
+                }
+            }
+        }
+    }
+    let set = closest.ok_or_else(|| Diagnostic::new("No visible set to autoscale."))?;
+    autoscale_sets(graph, "xy", Some(set));
+    Ok(())
+}
+
+fn autoscale_sets(graph: &mut Graph, axes: &str, selected: Option<u32>) {
     for (index, axis) in ["x", "y"].iter().enumerate() {
         if !axes.contains(axis) {
             continue;
         }
-        let log = value(&graph.settings, &format!("{axis}axes scale"), "Normal")
-            .eq_ignore_ascii_case("logarithmic");
+        let scale = scale::Scale::from_settings(&graph.settings, axis);
+        let log = scale.is_log();
+        let compatible = |point: f64| {
+            scale.project(point).is_some()
+                && (scale != scale::Scale::Reciprocal
+                    || point.signum() == graph.world[index].signum())
+        };
         let (mut low, mut high) = (f64::INFINITY, f64::NEG_INFINITY);
         for set in graph
             .sets
-            .values()
-            .filter(|set| value(&set.settings, "hidden", "false") != "true")
+            .iter()
+            .filter(|(id, set)| {
+                selected.is_none_or(|selected| selected == **id)
+                    && value(&set.settings, "hidden", "false") != "true"
+            })
+            .map(|(_, set)| set)
         {
             for row in &set.rows {
                 let Some(&coordinate) = row.get(index) else {
@@ -242,10 +342,10 @@ pub fn autoscale(graph: &mut Graph, axes: &str) {
                 let (lower, upper) = plot::errors(row, &set.kind, index);
                 let min = coordinate - lower;
                 let max = coordinate + upper;
-                if min.is_finite() && (!log || min > 0.) {
+                if compatible(min) {
                     low = low.min(min);
                 }
-                if max.is_finite() && (!log || max > 0.) {
+                if compatible(max) {
                     high = high.max(max);
                 }
             }
@@ -265,14 +365,16 @@ pub fn autoscale(graph: &mut Graph, axes: &str) {
                 10_f64.powf(high.log10().ceil()),
                 10.,
             )
-        } else {
+        } else if scale == scale::Scale::Normal {
             (
                 (low / step).floor() * step,
                 (high / step).ceil() * step,
                 step,
             )
+        } else {
+            (low, high, step)
         };
-        if min.is_finite() && max.is_finite() && min < max {
+        if scale.valid_range(min, max) {
             graph.world[index] = min;
             graph.world[index + 2] = max;
             graph

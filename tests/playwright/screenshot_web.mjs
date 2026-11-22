@@ -22,7 +22,8 @@ try {
   }
 
   const chooseData = page.waitForEvent("filechooser");
-  await openMenu("Data", "Import ASCII...");
+  await page.getByText("Data", { exact: true }).click();
+  await openMenu("Import", "ASCII...");
   await (
     await chooseData
   ).setFiles({
@@ -73,7 +74,8 @@ try {
   await page.screenshot({ path: outputPath, fullPage: true });
 
   const exportedPlot = page.waitForEvent("download");
-  await openMenu("Data", "Export SVG...");
+  await page.getByText("Data", { exact: true }).click();
+  await openMenu("Export", "SVG...");
   await (await exportedPlot).path();
 } finally {
   await browser.close();

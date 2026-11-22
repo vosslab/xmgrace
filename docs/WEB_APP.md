@@ -25,14 +25,18 @@ After building, run `npm run test:playwright` to test the production files under
 
 | Workflow | Browser support |
 | --- | --- |
-| Plot and edit XY data | Two-column ASCII import, linear and logarithmic axes, graph and set appearance, autoscale, zoom, and locator |
-| Load existing projects | Multi-graph XY, common symbols and line styles, symmetric and asymmetric XY error bars, and older page and range declarations |
-| Save and print | Download an editable AGR or vector SVG, or print through the browser |
-| Unsupported settings or graph types | Read-only partial preview with diagnostics and access to the original file |
-| Further porting | Classic dialog and shortcut parity, Grace text escapes and font metrics, advanced graphs and axes, data editing, FFT and other transformations, fitting, the command window, and additional hardcopy formats |
+| Create and edit data | Formula-generated XY, browser text entry, paged spreadsheet creation and editing, set operations, mapped ASCII tables, and numeric variables from NetCDF classic CDF-1 and CDF-2 files |
+| Analyze | Expressions with set references and region restrictions, FFT/DFT and windows, histograms, running statistics, differences, integration, splines, regression, nonlinear fitting, correlation, filtering, convolution, geometric transforms, sampling, pruning, and feature extraction |
+| Plot and annotate | XY, Fixed, Chart, Polar, and Pie rendering, with solid area fills and baselines for XY sets. Alternate axes, linear/logarithmic/reciprocal/logit scales, calendar and geographic tick formats, drawing objects, and common Grace text escapes. |
+| Manage graphs | Create, arrange, overlay, and style graphs, select points, and navigate with the classic toolbar. Locator settings belong to the open browser session. |
+| File handling | Select local files for project, data, parameter, and command inputs. Save downloads AGR and parameter files. Export downloads ASCII, SVG, PNG, JPEG, or vector PDF, and browser print uses the current plot. |
+| Commands | Run supported Grace plotting and analysis commands in the browser from typed input or a local command file. |
+| Unsupported settings | Read-only partial preview with diagnostics and access to the original file |
+| Further parity work | Older AGR migrations, exact layout and font metrics, custom ticks and fills, direct canvas editing gestures, more command statements, and native fixture coverage of advanced plots and analysis. |
 
-SVG layout and formatting still need detailed visual comparison with native Grace. The
-desktop program remains the reference for plotting and numerical behavior.
+The desktop program remains the reference for plotting and numerical behavior. The Fourier fixtures
+use Grace 5.1.25 with its built-in FFT backend. Full GUI compatibility is tracked in the
+[browser parity plan](active_plans/active/classic_grace_browser_parity.md).
 
 ## Repository boundaries
 
@@ -50,7 +54,8 @@ downloads and documentation. [Desktop Grace project](https://plasma-gate.weizman
 
 The Pages build writes a static site to `dist/`. The repository owner can select GitHub
 Actions as the Pages source, then dispatch **Deploy GitHub Pages** when ready.
-The workflow is manual. The build packages the original Grace copyright and
+Pull requests and pushes to `main` run build and test checks. Only manual dispatch publishes.
+The build packages the original Grace copyright and
 [GPL-2.0-or-later license](../LICENSE.GPL-2.0-or-later) alongside the application.
 The Rust and TypeScript source and build scripts are in the same
 [source repository](https://github.com/vosslab/xmgrace).

@@ -1,3 +1,4 @@
+pub(crate) use crate::plot_axes::Axis;
 use crate::{Graph, Project, Set, Settings, number, unquote, value};
 use std::fmt::Write;
 
@@ -5,9 +6,9 @@ const COLORS: [&str; 16] = [
     "#ffffff", "#000000", "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#bc8f8f", "#dcdcdc",
     "#9400d3", "#00ffff", "#ff00ff", "#ffa500", "#7221bc", "#670748", "#40e0d0", "#008b00",
 ];
-const FONT_SCALE: f64 = 0.028;
+pub(crate) const FONT_SCALE: f64 = 0.028;
 
-fn color(project: &Project, index: u32) -> String {
+pub(crate) fn color(project: &Project, index: u32) -> String {
     if let Some([r, g, b]) = project.colors.get(&index) {
         format!("#{r:02x}{g:02x}{b:02x}")
     } else {
@@ -15,33 +16,22 @@ fn color(project: &Project, index: u32) -> String {
     }
 }
 
-fn numeric(settings: &Settings, key: &str, default: f64) -> f64 {
+pub(crate) fn numeric(settings: &Settings, key: &str, default: f64) -> f64 {
     settings
         .get(key)
         .and_then(|value| number(value))
         .unwrap_or(default)
 }
 
-fn paint(project: &Project, settings: &Settings, key: &str, default: u32) -> String {
+pub(crate) fn paint(project: &Project, settings: &Settings, key: &str, default: u32) -> String {
     color(project, numeric(settings, key, f64::from(default)) as u32)
 }
 
-fn enabled(settings: &Settings, key: &str, default: bool) -> bool {
-    value(settings, key, if default { "on" } else { "off" }) == "on"
-}
-
-fn xml(text: &str) -> String {
-    text.chars()
-        .filter(|&ch| ch == '\t' || ch == '\n' || ch >= ' ')
-        .fold(String::new(), |mut escaped, ch| {
-            match ch {
-                '&' => escaped.push_str("&amp;"),
-                '<' => escaped.push_str("&lt;"),
-                '>' => escaped.push_str("&gt;"),
-                _ => escaped.push(ch),
-            }
-            escaped
-        })
+pub(crate) fn enabled(settings: &Settings, key: &str, default: bool) -> bool {
+    matches!(
+        value(settings, key, if default { "on" } else { "off" }),
+        "on" | "true"
+    )
 }
 
 pub(crate) fn nice_step(span: f64) -> f64 {
@@ -62,109 +52,15 @@ pub(crate) fn nice_step(span: f64) -> f64 {
     step * magnitude
 }
 
-struct Axis {
-    low: f64,
-    high: f64,
-    from: f64,
-    to: f64,
-    log: bool,
-}
-
-impl Axis {
-    fn new(graph: &Graph, name: &str, index: usize, from: f64, to: f64) -> Self {
-        let log = value(&graph.settings, &format!("{name}axes scale"), "Normal")
-            .eq_ignore_ascii_case("logarithmic");
-        let invert = enabled(&graph.settings, &format!("{name}axes invert"), false);
-        let (from, to) = if invert { (to, from) } else { (from, to) };
-        Self {
-            low: graph.world[index],
-            high: graph.world[index + 2],
-            from,
-            to,
-            log,
-        }
-    }
-
-    fn at(&self, n: f64) -> Option<f64> {
-        let (n, low, high) = if self.log {
-            (n.log10(), self.low.log10(), self.high.log10())
-        } else {
-            (n, self.low, self.high)
-        };
-        let p = self.from + (n - low) / (high - low) * (self.to - self.from);
-        p.is_finite().then_some(p.clamp(-1e9, 1e9))
-    }
-
-    fn ticks(&self, settings: &Settings, key: &str) -> Vec<(f64, bool)> {
-        let (low, high) = if self.log {
-            (self.low.log10(), self.high.log10())
-        } else {
-            (self.low, self.high)
-        };
-        let requested = numeric(
-            settings,
-            &format!("{key} tick major"),
-            if self.log {
-                10.
-            } else {
-                nice_step((high - low) / 5.)
-            },
-        );
-        let mut step = if self.log {
-            requested.log10()
-        } else {
-            requested
-        };
-        if !step.is_finite() || step <= 0. || (high - low) / step > 200. {
-            step = if self.log {
-                ((high - low) / 5.).ceil().max(1.)
-            } else {
-                nice_step((high - low) / 5.)
-            };
-        }
-        let start = (low / step + 1e-9).floor() * step;
-        let minors = numeric(
-            settings,
-            &format!("{key} tick minor ticks"),
-            if self.log { 8. } else { 1. },
-        ) as u32;
-        let mut output = Vec::new();
-        for index in 0..=202 {
-            let start = start + f64::from(index) * step;
-            if start > high + step * 1e-8 {
-                break;
-            }
-            for minor in 0..=minors.min(20) {
-                let adjusted = if self.log && (step - 1.).abs() < 1e-10 {
-                    start + (f64::from(minor) + 1.).log10()
-                } else {
-                    start + step * f64::from(minor) / (f64::from(minors.min(20)) + 1.)
-                };
-                if adjusted >= low - step * 1e-8 && adjusted <= high + step * 1e-8 {
-                    let n = if self.log {
-                        10_f64.powf(adjusted)
-                    } else if adjusted.abs() < step * 1e-10 {
-                        0.
-                    } else {
-                        adjusted
-                    };
-                    output.push((n, minor == 0));
-                }
-            }
-        }
-        output
-    }
-}
-
-struct Page<'a> {
-    project: &'a Project,
-    scale: f64,
-    height: f64,
-    output: String,
+pub(crate) struct Page<'a> {
+    pub(crate) project: &'a Project,
+    pub(crate) scale: f64,
+    pub(crate) height: f64,
+    pub(crate) output: String,
 }
 
 impl Page<'_> {
-    fn path(&mut self, data: &str, stroke: &str, width: f64, style: u32, fill: &str) {
+    pub(crate) fn path(&mut self, data: &str, stroke: &str, width: f64, style: u32, fill: &str) {
         if data.is_empty() || (style == 0 && fill == "none") {
             return;
         }
@@ -194,7 +90,7 @@ impl Page<'_> {
         );
     }
 
-    fn label(
+    pub(crate) fn label(
         &mut self,
         (x, y): (f64, f64),
         text: &str,
@@ -206,7 +102,7 @@ impl Page<'_> {
         if text.is_empty() || size <= 0. {
             return;
         }
-        let text = xml(text);
+        let text = crate::grace_text::svg_runs(text);
         let _ = write!(
             self.output,
             "<text x=\"{x:.3}\" y=\"{y:.3}\" fill=\"{ink}\" font-size=\"{size:.3}\" text-anchor=\"{anchor}\" transform=\"rotate({rotation} {x:.3} {y:.3})\">{text}</text>"
@@ -214,7 +110,7 @@ impl Page<'_> {
     }
 
     fn graph(&mut self, id: u32, graph: &Graph) {
-        if !graph.visible || !graph.kind.eq_ignore_ascii_case("xy") {
+        if !graph.visible {
             return;
         }
         let settings = &graph.settings;
@@ -237,11 +133,24 @@ impl Page<'_> {
             let fill = paint(self.project, settings, "frame background color", 0);
             self.path(&frame, "none", 0., 0, &fill);
         }
+        let kind = graph.kind.to_ascii_lowercase();
+        if kind == "pie" {
+            self.pie(graph, left, top, width, height);
+            self.graph_titles(graph, left, right, top);
+            self.output.push_str("</g>");
+            return;
+        }
         for grid in [true, false] {
             if !grid {
                 let _ = write!(self.output, "<g clip-path=\"url(#graph-{id})\">");
-                for set in graph.sets.values() {
-                    self.set(set, &x, &y);
+                match kind.as_str() {
+                    "chart" => self.chart(graph, &x, &y),
+                    "polar" => self.polar(graph, left, bottom, right, top),
+                    _ => {
+                        for set in graph.sets.values() {
+                            self.set(set, &x, &y, [graph.world[1], graph.world[3]]);
+                        }
+                    }
                 }
                 self.output.push_str("</g>");
                 if numeric(settings, "frame pattern", 1.) != 0. {
@@ -254,9 +163,19 @@ impl Page<'_> {
                     );
                 }
             }
-            self.axis(&x, settings, "xaxis", bottom, top, grid);
-            self.axis(&y, settings, "yaxis", left, right, grid);
+            self.axis(&x, settings, "xaxis", (bottom, top), grid, false);
+            self.axis(&y, settings, "yaxis", (left, right), grid, false);
+            self.axis(&x, settings, "altxaxis", (top, bottom), grid, true);
+            self.axis(&y, settings, "altyaxis", (right, left), grid, true);
         }
+        self.graph_titles(graph, left, right, top);
+        self.legend(graph, &x, &y);
+        self.output.push_str("</g>");
+    }
+
+    fn graph_titles(&mut self, graph: &Graph, left: f64, right: f64, top: f64) {
+        let settings = &graph.settings;
+        let unit = self.scale;
         for (key, offset, size) in [("title", 0.05, 1.5), ("subtitle", 0.02, 1.)] {
             let ink = paint(self.project, settings, &format!("{key} color"), 1);
             let font = numeric(settings, &format!("{key} size"), size) * unit * FONT_SCALE;
@@ -269,157 +188,208 @@ impl Page<'_> {
                 0.,
             );
         }
-        self.legend(graph, &x, &y);
-        self.output.push_str("</g>");
     }
 
-    fn axis(
-        &mut self,
-        axis: &Axis,
-        settings: &Settings,
-        key: &str,
-        normal: f64,
-        opposite: f64,
-        grid: bool,
-    ) {
-        if !enabled(settings, key, true) {
-            return;
-        }
-        let horiz = key == "xaxis";
-        let p = |coordinate: f64, crossed: f64| {
-            if horiz {
-                (coordinate, crossed)
-            } else {
-                (crossed, coordinate)
-            }
-        };
-        let tick_place = value(settings, &format!("{key} tick place"), "both");
-        let ink = paint(self.project, settings, &format!("{key} ticklabel color"), 1);
-        let unit = self.scale;
-        let size = unit * FONT_SCALE * numeric(settings, &format!("{key} ticklabel char size"), 1.);
-        for (n, major) in axis.ticks(settings, key) {
-            let Some(coordinate) = axis.at(n) else {
-                continue;
-            };
-            let kind = if major { "major" } else { "minor" };
-            let color = paint(
-                self.project,
-                settings,
-                &format!("{key} tick {kind} color"),
-                1,
-            );
-            if grid {
-                if enabled(settings, &format!("{key} tick {kind} grid"), false) {
-                    let (x1, y1) = p(coordinate, normal);
-                    let (x2, y2) = p(coordinate, opposite);
-                    self.path(
-                        &format!("M{x1:.3},{y1:.3}L{x2:.3},{y2:.3}"),
-                        &color,
-                        unit * 0.0015,
-                        1,
-                        "none",
-                    );
+    /// Grace charts render each XY point as a bar. The browser accepts both the
+    /// classic `bar` set type and ordinary XY data in a Chart graph.
+    fn chart(&mut self, graph: &Graph, x: &Axis, y: &Axis) {
+        let stacked = enabled(&graph.settings, "stacked", false);
+        let gap = numeric(&graph.settings, "bar hgap", 0.).clamp(0., 0.9);
+        let sets: Vec<_> = graph
+            .sets
+            .values()
+            .filter(|set| value(&set.settings, "hidden", "false") != "true")
+            .collect();
+        let mut bases = std::collections::BTreeMap::<i64, f64>::new();
+        for (set_index, set) in sets.iter().enumerate() {
+            let mut error_bars = String::new();
+            let mut error_caps = String::new();
+            let width = set
+                .rows
+                .windows(2)
+                .filter_map(|rows| rows[1].first().zip(rows[0].first()))
+                .map(|(next, previous)| (next - previous).abs())
+                .fold(f64::INFINITY, f64::min)
+                .min(x.span() / 10.);
+            let group = (sets.len().max(1) as f64).recip();
+            for row in &set.rows {
+                let Some((&value_x, &value_y)) = row.first().zip(row.get(1)) else {
+                    continue;
+                };
+                let key = (value_x * 1e9).round() as i64;
+                let base = if stacked {
+                    *bases.get(&key).unwrap_or(&0.)
+                } else {
+                    0.
+                };
+                if stacked {
+                    bases.insert(key, base + value_y);
                 }
-                continue;
-            }
-            if enabled(settings, &format!("{key} tick"), true) {
-                let length = unit
-                    * 0.02
-                    * numeric(
-                        settings,
-                        &format!("{key} tick {kind} size"),
-                        if major { 1. } else { 0.5 },
-                    );
-                let sign = (opposite - normal).signum();
-                for (side, position, direction) in
-                    [("normal", normal, sign), ("opposite", opposite, -sign)]
-                {
-                    if tick_place != "both" && tick_place != side {
-                        continue;
+                let center = if stacked {
+                    value_x
+                } else {
+                    value_x + (set_index as f64 + 0.5) * width * group - width * 0.5
+                };
+                let half = width * group * (1. - gap) * 0.5;
+                let Some((x0, x1, y0, y1)) = x
+                    .at(center - half)
+                    .zip(x.at(center + half))
+                    .zip(y.at(base))
+                    .zip(y.at(base + value_y))
+                    .map(|(((x0, x1), y0), y1)| (x0, x1, y0, y1))
+                else {
+                    continue;
+                };
+                let path = format!("M{x0:.3},{y0:.3}H{x1:.3}V{y1:.3}H{x0:.3}Z");
+                let fill = paint(self.project, &set.settings, "line color", 1);
+                self.path(&path, &fill, self.scale * 0.0015, 1, &fill);
+                if enabled(&set.settings, "errorbar", true) {
+                    let (negative, positive) = match set.kind.as_str() {
+                        "bardy" => (
+                            row.get(2).copied().unwrap_or(0.).abs(),
+                            row.get(2).copied().unwrap_or(0.).abs(),
+                        ),
+                        "bardydy" => (
+                            row.get(3).copied().unwrap_or(0.).abs(),
+                            row.get(2).copied().unwrap_or(0.).abs(),
+                        ),
+                        _ => continue,
+                    };
+                    let cap = numeric(&set.settings, "errorbar size", 1.) * self.scale * 0.01;
+                    let place = value(&set.settings, "errorbar place", "both");
+                    let top_value = base + value_y;
+                    for (delta, side) in [(-negative, "opposite"), (positive, "normal")] {
+                        if delta == 0. || (place != "both" && place != side) {
+                            continue;
+                        }
+                        if let Some(edge) = y.at(top_value + delta) {
+                            let _ = write!(error_bars, "M{:.3},{y1:.3}V{edge:.3}", (x0 + x1) * 0.5);
+                            let _ = write!(
+                                error_caps,
+                                "M{:.3},{edge:.3}h{:.3}",
+                                (x0 + x1) * 0.5 - cap,
+                                2. * cap
+                            );
+                        }
                     }
-                    let (x1, y1) = p(coordinate, position);
-                    let (x2, y2) = p(coordinate, position + length * direction);
-                    self.path(
-                        &format!("M{x1:.3},{y1:.3}L{x2:.3},{y2:.3}"),
-                        &color,
-                        unit * 0.0015,
-                        1,
-                        "none",
-                    );
                 }
             }
-            if major && enabled(settings, &format!("{key} ticklabel"), true) {
-                let prec =
-                    numeric(settings, &format!("{key} ticklabel prec"), 5.).clamp(0., 12.) as usize;
-                let format = value(settings, &format!("{key} ticklabel format"), "general");
-                let text = tick_text(n, prec, format);
-                let text = format!(
-                    "{}{}{}",
-                    unquote(value(settings, &format!("{key} ticklabel prepend"), "")),
-                    text,
-                    unquote(value(settings, &format!("{key} ticklabel append"), ""))
-                );
-                let (x, y) = p(
-                    coordinate,
-                    normal
-                        + if horiz {
-                            size + unit * 0.01
-                        } else {
-                            -unit * 0.01
-                        },
-                );
-                self.label(
-                    (x, if horiz { y } else { y + size * 0.32 }),
-                    &text,
-                    size,
-                    &ink,
-                    if horiz { "middle" } else { "end" },
-                    0.,
-                );
-            }
-        }
-        if grid {
-            return;
-        }
-        if enabled(settings, &format!("{key} bar"), true) {
-            let (x1, y1) = p(axis.from, normal);
-            let (x2, y2) = p(axis.to, normal);
-            let color = paint(self.project, settings, &format!("{key} bar color"), 1);
-            let width = numeric(settings, &format!("{key} bar linewidth"), 1.) * unit * 0.0015;
+            let ink = paint(self.project, &set.settings, "errorbar color", 1);
             self.path(
-                &format!("M{x1:.3},{y1:.3}L{x2:.3},{y2:.3}"),
-                &color,
-                width,
-                1,
+                &error_bars,
+                &ink,
+                numeric(&set.settings, "errorbar riser linewidth", 1.) * self.scale * 0.0015,
+                numeric(&set.settings, "errorbar riser linestyle", 1.) as u32,
+                "none",
+            );
+            self.path(
+                &error_caps,
+                &ink,
+                numeric(&set.settings, "errorbar linewidth", 1.) * self.scale * 0.0015,
+                numeric(&set.settings, "errorbar linestyle", 1.) as u32,
                 "none",
             );
         }
-        let (x, y) = p(
-            (axis.from + axis.to) * 0.5,
-            normal
-                + if horiz {
-                    size + unit * 0.045
-                } else {
-                    -unit * 0.075
-                },
-        );
-        let ink = paint(self.project, settings, &format!("{key} label color"), 1);
-        let label_size =
-            numeric(settings, &format!("{key} label char size"), 1.) * unit * FONT_SCALE;
-        self.label(
-            (x, y),
-            unquote(value(settings, &format!("{key} label"), "")),
-            label_size,
-            &ink,
-            "middle",
-            if horiz { 0. } else { -90. },
+    }
+
+    /// Polar data stores angle in X radians and radius in Y. Its world limits
+    /// determine the visible radius while the view rectangle supplies the circle.
+    fn polar(&mut self, graph: &Graph, left: f64, bottom: f64, right: f64, top: f64) {
+        let center = ((left + right) * 0.5, (top + bottom) * 0.5);
+        let radius = (right - left).abs().min((bottom - top).abs()) * 0.5;
+        let low = graph.world[1];
+        let high = graph.world[3];
+        if !low.is_finite() || !high.is_finite() || low >= high {
+            return;
+        }
+        for set in graph.sets.values() {
+            if value(&set.settings, "hidden", "false") == "true" {
+                continue;
+            }
+            let mut path = String::new();
+            for (index, row) in set.rows.iter().enumerate() {
+                let Some((&angle, &r)) = row.first().zip(row.get(1)) else {
+                    continue;
+                };
+                let r = (r - low) / (high - low) * radius;
+                let px = center.0 + r * angle.cos();
+                let py = center.1 - r * angle.sin();
+                let _ = write!(
+                    path,
+                    "{}{:0.3},{:0.3}",
+                    if index == 0 { "M" } else { "L" },
+                    px,
+                    py
+                );
+            }
+            self.path(
+                &path,
+                &paint(self.project, &set.settings, "line color", 1),
+                numeric(&set.settings, "line linewidth", 1.) * self.scale * 0.0015,
+                numeric(&set.settings, "line linestyle", 1.) as u32,
+                "none",
+            );
+        }
+        self.path(
+            &format!("M{:.3},{:.3}a{radius:.3},{radius:.3} 0 1,0 {:.3},0a{radius:.3},{radius:.3} 0 1,0 {:.3},0", center.0 - radius, center.1, 2. * radius, -2. * radius),
+            &paint(self.project, &graph.settings, "frame color", 1), self.scale * 0.0015, 1, "none",
         );
     }
 
-    fn set(&mut self, set: &Set, x: &Axis, y: &Axis) {
+    fn pie(&mut self, graph: &Graph, left: f64, top: f64, width: f64, height: f64) {
+        let values: Vec<_> = graph
+            .sets
+            .values()
+            .flat_map(|set| set.rows.iter().map(move |row| (set, row)))
+            .filter_map(|(set, row)| {
+                row.get(1)
+                    .copied()
+                    .filter(|value| *value > 0.)
+                    .map(|value| (set, value))
+            })
+            .collect();
+        let total: f64 = values.iter().map(|(_, value)| value).sum();
+        if !total.is_finite() || total <= 0. {
+            return;
+        }
+        let center = (left + width * 0.5, top + height * 0.5);
+        let radius = width.min(height) * 0.38;
+        let mut angle = -std::f64::consts::FRAC_PI_2;
+        for (index, (set, value)) in values.into_iter().enumerate() {
+            let end = angle + value / total * std::f64::consts::TAU;
+            let (x0, y0) = (
+                center.0 + radius * angle.cos(),
+                center.1 + radius * angle.sin(),
+            );
+            let (x1, y1) = (center.0 + radius * end.cos(), center.1 + radius * end.sin());
+            let large = u32::from(end - angle > std::f64::consts::PI);
+            let data = format!(
+                "M{:.3},{:.3}L{x0:.3},{y0:.3}A{radius:.3},{radius:.3} 0 {large},1 {x1:.3},{y1:.3}Z",
+                center.0, center.1
+            );
+            let fill = paint(
+                self.project,
+                &set.settings,
+                "line color",
+                (index as u32 % 15) + 1,
+            );
+            self.path(&data, "#ffffff", self.scale * 0.0015, 1, &fill);
+            angle = end;
+        }
+    }
+
+    fn objects(&mut self) {
+        crate::plot_objects::draw(self);
+    }
+
+    fn set(&mut self, set: &Set, x: &Axis, y: &Axis, y_world: [f64; 2]) {
         if value(&set.settings, "hidden", "false") == "true" {
             return;
         }
+        if crate::plot_special::draw(self, set, x, y) {
+            return;
+        }
+        crate::plot_set_fill::draw(self, set, x, y, y_world);
         let settings = &set.settings;
         let unit = self.scale;
         let mut data = String::new();
@@ -601,27 +571,6 @@ impl Page<'_> {
     }
 }
 
-fn tick_text(n: f64, precision: usize, format: &str) -> String {
-    match format {
-        "decimal" => format!("{n:.precision$}"),
-        "exponential" => format!("{n:.precision$e}"),
-        _ if n != 0. && !(0.0001..1_000_000.).contains(&n.abs()) => format!("{n:.precision$e}"),
-        _ => {
-            let decimals = if n == 0. {
-                0
-            } else {
-                (precision as i32 - n.abs().log10().floor() as i32 - 1).clamp(0, 12) as usize
-            };
-            let text = format!("{n:.decimals$}");
-            if decimals == 0 {
-                text
-            } else {
-                text.trim_end_matches('0').trim_end_matches('.').into()
-            }
-        }
-    }
-}
-
 pub(crate) fn errors(row: &[f64], kind: &str, axis: usize) -> (f64, f64) {
     let (low, high) = match (kind, axis) {
         ("xydx", 0) | ("xydy", 1) | ("xydxdy", 0) => (2, 2),
@@ -636,7 +585,7 @@ pub(crate) fn errors(row: &[f64], kind: &str, axis: usize) -> (f64, f64) {
     )
 }
 
-fn symbol_path(path: &mut String, symbol: u32, x: f64, y: f64, radius: f64) {
+pub(crate) fn symbol_path(path: &mut String, symbol: u32, x: f64, y: f64, radius: f64) {
     let vertices: &[(f64, f64)] = match symbol {
         2 => &[(-0.85, -0.85), (0.85, -0.85), (0.85, 0.85), (-0.85, 0.85)],
         3 => &[(0., -1.), (1., 0.), (0., 1.), (-1., 0.)],
@@ -708,6 +657,31 @@ pub fn svg(project: &Project) -> String {
     for (&id, graph) in &project.graphs {
         page.graph(id, graph);
     }
+    page.objects();
     page.output.push_str("</svg>");
     page.output
+}
+
+#[cfg(test)]
+mod tests {
+    use super::svg;
+    use crate::Project;
+
+    #[test]
+    fn alternate_axes_are_opt_in_and_use_the_opposite_graph_edges() {
+        let mut project = Project::new();
+        let baseline = svg(&project);
+        assert!(!baseline.contains("M91.800,91.800L703.800,91.800"));
+        assert!(!baseline.contains("M703.800,520.200L703.800,91.800"));
+
+        let settings = &mut project.graphs.get_mut(&0).expect("default graph").settings;
+        settings.insert("altxaxis".into(), "on".into());
+        settings.insert("altyaxis".into(), "on".into());
+        settings.insert("altxaxis label".into(), "Upper axis".into());
+        let alternate = svg(&project);
+        assert!(alternate.contains("M91.800,91.800L703.800,91.800"));
+        assert!(alternate.contains("M703.800,520.200L703.800,91.800"));
+        assert!(alternate.contains("y=\"47.124\""));
+        assert!(alternate.contains("Upper axis"));
+    }
 }

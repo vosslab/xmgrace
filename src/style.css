@@ -117,7 +117,7 @@ nav > details:last-child {
 }
 
 summary {
-  display: grid;
+  display: flex;
   align-items: center;
   min-block-size: 2.5rem;
   padding: 0.35rem 0.7rem;
@@ -152,7 +152,7 @@ details[open] summary {
   box-shadow: var(--surface-shadow);
 }
 
-details:last-child .menu {
+nav > details:last-child > .menu {
   inset-inline: auto 0;
 }
 
@@ -181,6 +181,73 @@ details:last-child .menu {
   margin: 0.25rem 0.4rem;
   border: 0;
   border-block-start: 1px solid var(--divider);
+}
+
+.menu-nested {
+  position: relative;
+}
+
+.menu-nested > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: 2.5rem;
+  padding: 0.4rem 0.65rem;
+  font-weight: 500;
+}
+
+.menu-nested > summary::after {
+  /* U+203A, the right-pointing single angle quotation mark. */
+  content: "\203a";
+  font-size: 1.25em;
+}
+
+.menu-nested > .menu {
+  inset-block-start: 0;
+  inset-inline-start: calc(100% + 0.25rem);
+  margin: 0;
+  max-block-size: min(35rem, 64dvh);
+  overflow: auto;
+}
+
+.data-table {
+  display: block;
+  max-block-size: min(50vh, 32rem);
+  overflow: auto;
+  border: 1px solid var(--divider);
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.2rem;
+  border: 1px solid var(--divider);
+  text-align: end;
+}
+
+.data-table thead th {
+  position: sticky;
+  inset-block-start: 0;
+  background: var(--surface);
+}
+
+.data-table input {
+  min-block-size: 2rem;
+  inline-size: 7rem;
+  padding: 0.2rem 0.35rem;
+}
+
+.dialog-submenu {
+  padding: 0.4rem 0;
+}
+
+.dialog-submenu summary {
+  min-block-size: auto;
+  padding: 0.25rem 0;
+}
+
+.dialog-submenu button {
+  margin: 0.35rem 0 0 0.7rem;
 }
 
 .locator {
@@ -220,14 +287,12 @@ main {
   background: var(--surface);
 }
 
-.toolbar-group,
-.arrows {
+.toolbar-group {
   display: grid;
   gap: 0.35rem;
 }
 
-.toolbar-group + .toolbar-group,
-.arrows {
+.toolbar-group + .toolbar-group {
   padding-block-start: 0.75rem;
   border-block-start: 1px solid var(--divider);
 }
@@ -237,8 +302,23 @@ main {
   padding-inline: 0.25rem;
 }
 
-.arrows {
+.toolbar-pairs {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#world-stack {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+#dialog-content > textarea {
+  display: block;
+  inline-size: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  color: inherit;
+  font: inherit;
 }
 
 #workspace {
@@ -404,8 +484,21 @@ input:not([type="checkbox"], [type="file"]),
   }
 
   .menu,
-  details:last-child .menu {
+  nav > details:last-child > .menu {
     inset-inline: 0.5rem auto;
+  }
+
+  nav > details > .menu {
+    max-block-size: 55dvh;
+    overflow: auto;
+  }
+
+  .menu-nested > .menu {
+    position: static;
+    inline-size: 100%;
+    min-inline-size: 0;
+    margin-block: 0.25rem;
+    box-shadow: none;
   }
 
   main {
@@ -422,16 +515,14 @@ input:not([type="checkbox"], [type="file"]),
     border-block-end: 1px solid var(--divider);
   }
 
-  .toolbar-group,
-  .arrows {
+  .toolbar-group {
     display: flex;
     flex-wrap: wrap;
     padding: 0;
     border: 0;
   }
 
-  .toolbar-group + .toolbar-group,
-  .arrows {
+  .toolbar-group + .toolbar-group {
     padding-block-start: 0;
     border-block-start: 0;
   }

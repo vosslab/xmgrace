@@ -10,22 +10,40 @@ const form = element<HTMLFormElement>("dialog-form");
 const content = element("dialog-content");
 const error = element("dialog-error");
 let submit: Submit | undefined;
+let revision = 0;
+let saving = false;
+
+dialog.addEventListener("cancel", () => {
+  revision++;
+  saving = false;
+});
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (!submit || saving) return;
+  const submitted = revision;
+  saving = true;
   error.hidden = true;
   try {
-    await submit?.(new FormData(form));
-    if (!(event.submitter instanceof HTMLButtonElement) || event.submitter.value !== "apply")
-      dialog.close();
+    await submit(new FormData(form));
+    if (
+      revision === submitted &&
+      (!(event.submitter instanceof HTMLButtonElement) || event.submitter.value !== "apply")
+    )
+      closeDialog();
   } catch (failure) {
+    if (revision !== submitted) return;
     error.textContent =
       failure instanceof Error ? failure.message : "Grace could not apply these settings.";
     error.hidden = false;
+  } finally {
+    if (revision === submitted) saving = false;
   }
 });
 
 export function showDialog(title: string, controls: HTMLElement[], onSubmit?: Submit): void {
+  revision++;
+  saving = false;
   element("dialog-title").textContent = title;
   content.replaceChildren(...controls);
   error.hidden = true;
@@ -36,7 +54,14 @@ export function showDialog(title: string, controls: HTMLElement[], onSubmit?: Su
 }
 
 export function closeDialog(): void {
+  revision++;
+  saving = false;
   dialog.close();
+}
+
+export function formText(data: FormData, name: string): string {
+  const value = data.get(name);
+  return typeof value === "string" ? value : "";
 }
 
 export function field(

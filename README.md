@@ -5,10 +5,10 @@ the browser, edit them with the classic Grace controls, and save projects that d
 
 [Open Grace in your browser](https://vosslab.github.io/xmgrace/)
 
-The TypeScript and Rust/WebAssembly browser port is in development. It supports an editable XY
-workflow, including linear and logarithmic axes, symbols, line styles, and SVG export. Projects
-with unsupported Grace settings open as read-only previews with diagnostics. See the
-compatibility table in [docs/WEB_APP.md](docs/WEB_APP.md).
+The TypeScript and Rust/WebAssembly port can edit Grace projects, generate data from formulas,
+and run data transformations such as FFT and curve fitting. It downloads AGR projects and
+SVG, PNG, JPEG, and PDF figures. Projects with unsupported settings open as read-only previews
+with diagnostics. [Browser compatibility](docs/WEB_APP.md#compatibility)
 
 ## A plot in Grace
 
@@ -35,7 +35,7 @@ Open `http://localhost:8787/`. The Grace window opens to a blank graph.
 
 ## Make the cooling plot
 
-Choose **Help > Examples...** to open the completed plot or a calibration plot with error bars.
+Choose **Help > Examples** to open the completed plot or a calibration plot with error bars.
 To build the cooling plot yourself, import the readings below.
 
 Save these sample readings as `cooling.dat`. Each line contains elapsed minutes and temperature
@@ -51,13 +51,22 @@ in degrees Celsius.
 12 29
 ```
 
-1. Choose **Data > Import ASCII...** and open `cooling.dat`. Grace scales the axes to fit the data.
+1. Choose **Data > Import > ASCII...** and select `cooling.dat`. Grace scales the axes to fit the data.
 2. Use **Plot > Axis properties...** to label the X axis **Time (min)** and the Y axis
    **Temperature (&deg;C)**. Use **Plot > Graph appearance...** to title the plot **Cooling curve**.
    To match the screenshot, set the X axis start and stop to `-1` and `13`, then choose
    **Blue** and **Circle** under **Plot > Set appearance...**.
-3. Choose **File > Save as...** for an editable `.agr` project, or **Data > Export SVG...** for a
+3. Choose **File > Save as...** for an editable `.agr` project, or **Data > Export > SVG...** for a
    vector figure.
+
+## Generate a sine wave and transform it
+
+1. In a blank project, open **Edit > Data sets... > Create new > By formula...**.
+2. Enter `0` for **Start**, `2*pi*127/128` for **Stop**, and `128` for **Points**. Use `$t`
+   for the X formula and `sin($t)` for the Y formula. Choose **Accept**.
+3. Open **Data > Transformations > Fourier transforms...**. Select the sine set, **Fast Fourier
+   transform**, and **Magnitude**, then choose **Accept**. The new set has its peak at bin 1.
+   To transform the default 100-point sine, select **Direct Fourier transform** instead.
 
 ## Documentation
 
