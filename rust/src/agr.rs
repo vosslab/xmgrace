@@ -1,5 +1,7 @@
-use crate::{Diagnostic, Graph, Project, TEMPLATE, number, set_world};
+use crate::{Diagnostic, Graph, Project, number, set_world};
 use std::fmt::Write;
+
+const DESKTOP_DEFAULTS: &str = include_str!("../data/desktop_defaults.agr");
 
 const GRAPH_KEYS: &[&str] = &[
     "title",
@@ -175,12 +177,11 @@ fn width(kind: &str) -> Option<usize> {
 
 pub fn open(bytes: &[u8]) -> Result<Project, Diagnostic> {
     let text = decode(bytes);
-    let mut project = Project::default();
+    let mut project = Project::for_agr_import();
     let mut graph_id = 0;
     let mut target: Option<(u32, u32)> = None;
     let mut effective_type = None;
     let mut saw_version = false;
-    let defaults = std::str::from_utf8(TEMPLATE).expect("Grace template is ASCII");
     for (index, raw) in text.lines().enumerate() {
         let line = index + 1;
         let raw = raw.trim();
@@ -241,7 +242,7 @@ pub fn open(bytes: &[u8]) -> Result<Project, Diagnostic> {
                     }
                     effective_type = Some(kind);
                 }
-                _ => apply(&mut project, &mut graph_id, defaults, line, command)?,
+                _ => apply(&mut project, &mut graph_id, line, command)?,
             }
             continue;
         }
@@ -291,7 +292,6 @@ pub fn open(bytes: &[u8]) -> Result<Project, Diagnostic> {
 fn apply(
     project: &mut Project,
     graph_id: &mut u32,
-    defaults: &str,
     line: usize,
     command: &str,
 ) -> Result<(), Diagnostic> {
@@ -300,7 +300,7 @@ fn apply(
         .collect::<Vec<_>>()
         .join(" ");
     let is_default = || {
-        defaults.lines().any(|raw| {
+        DESKTOP_DEFAULTS.lines().any(|raw| {
             raw.strip_prefix('@').is_some_and(|entry| {
                 entry
                     .split_ascii_whitespace()

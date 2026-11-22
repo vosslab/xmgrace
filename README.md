@@ -33,6 +33,9 @@ Open `http://localhost:8787/`. The Grace window opens to a blank graph.
 
 ## Make the cooling plot
 
+Choose **Help > Examples...** to open the completed plot or a calibration plot with error bars.
+To build the cooling plot yourself, import the readings below.
+
 Save these sample readings as `cooling.dat`. Each line contains elapsed minutes and temperature
 in degrees Celsius.
 
@@ -57,11 +60,10 @@ in degrees Celsius.
 ## Documentation
 
 - Build, verify, and check which Grace features are supported. [docs/WEB_APP.md](docs/WEB_APP.md)
-- Install desktop Grace or look up its original controls. [doc/UsersGuide.html](doc/UsersGuide.html)
-- Work through the original desktop plotting exercises. [doc/Tutorial.html](doc/Tutorial.html)
-- Find answers to common desktop Grace questions. [doc/FAQ.html](doc/FAQ.html)
+- Install desktop Grace or look up its original controls. [Desktop Grace User's Guide](https://plasma-gate.weizmann.ac.il/Grace/doc/UsersGuide.html)
+- Work through the original desktop plotting exercises. [Desktop Grace tutorials](https://plasma-gate.weizmann.ac.il/Grace/doc/Tutorial.html)
 - Follow browser port changes. [docs/CHANGELOG.md](docs/CHANGELOG.md)
-- Read the upstream release history. [CHANGES](CHANGES)
+- Read the upstream release history. [Desktop Grace release history](https://plasma-gate.weizmann.ac.il/Grace/doc/CHANGES.html)
 
 ## License and credits
 

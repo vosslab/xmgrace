@@ -9,7 +9,6 @@ pub use agr::{open, save};
 pub use plot::svg;
 
 pub type Settings = BTreeMap<String, String>;
-pub const TEMPLATE: &[u8] = include_bytes!("../../templates/Default.agr");
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Diagnostic {
@@ -82,6 +81,24 @@ pub struct Project {
 
 impl Default for Project {
     fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Project {
+    /// Creates the editable project shown for a new browser document.
+    pub fn new() -> Self {
+        let mut project = Self::empty();
+        project.graphs.insert(0, Graph::default());
+        project
+    }
+
+    /// Starts an AGR import without assuming the input declares graph zero.
+    pub(crate) fn for_agr_import() -> Self {
+        Self::empty()
+    }
+
+    fn empty() -> Self {
         Self {
             page: [792., 612.],
             graphs: BTreeMap::new(),

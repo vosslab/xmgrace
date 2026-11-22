@@ -1,7 +1,4 @@
-# Build prerequisites (npm ships with Node).
-brew "boost"
-brew "cairo"
+# Browser app build prerequisites.
 brew "node"
-brew "rdkit"
 brew "rustup"
 brew "wasm-pack"

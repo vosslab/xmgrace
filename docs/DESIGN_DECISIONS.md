@@ -21,3 +21,16 @@ authoritative code or contract document, rather than a person.
 
 **Owner.** <the authoritative code or contract doc>
 ```
+
+### Browser app owns the source tree
+
+**Decision.** Maintain the TypeScript app and its Rust engine in this repository. Use desktop
+Grace as the reference for AGR interoperability and plot comparisons.
+
+**Why.** A single build and source boundary keeps development focused on the browser product.
+
+**Consequence.** The browser starts new projects from Rust defaults and ships its own editable
+examples. Desktop binaries, build paths, and manuals are available through the upstream project
+and Git history.
+
+**Owner.** [WEB_APP.md](WEB_APP.md)

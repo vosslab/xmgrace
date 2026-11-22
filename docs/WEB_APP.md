@@ -34,6 +34,18 @@ After building, run `npm run test:playwright` to test the production files under
 SVG layout and formatting still need detailed visual comparison with native Grace. The
 desktop program remains the reference for plotting and numerical behavior.
 
+## Repository boundaries
+
+The browser app lives under `src/`, with its editable examples in `src/examples/`.
+Rust owns the project model and creates blank projects directly. The AGR reader uses a copy
+of the Grace 5.1 desktop defaults as an input-format reference for recognizing desktop output.
+The build bundles the browser code, worker, WebAssembly, and project examples together.
+
+For native comparisons, install Grace 5.1.25 separately and use `gracebat` to render sample
+projects. The inherited desktop implementation is preserved in Git history at commit
+`f6a9045e9028277fcf7ad297c4c0fdb766753376`. The upstream project maintains the native
+downloads and documentation. [Desktop Grace project](https://plasma-gate.weizmann.ac.il/Grace/)
+
 ## Publishing
 
 The Pages build writes a static site to `dist/`. The repository owner can select GitHub

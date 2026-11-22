@@ -1,0 +1,25 @@
+# Example for the Grace browser app.
+@version 50125
+@g0 on
+@g0 type XY
+@with g0
+@    world -1, 20, 13, 90
+@    title "Cooling curve"
+@    xaxis label "Time (min)"
+@    xaxis tick major 2
+@    yaxis label "Temperature (Celsius)"
+@    yaxis tick major 10
+@    s0 type xy
+@    s0 line color 4
+@    s0 symbol 1
+@    s0 symbol color 4
+@target G0.S0
+@type xy
+0 85
+2 68
+4 55
+6 45
+8 38
+10 33
+12 29
+&

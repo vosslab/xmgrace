@@ -1,3 +1,10 @@
+## 2026-11-22
+
+### Fixes and Maintenance
+
+- Removed the inherited desktop C build, vendored libraries, and bundled manuals.
+- Made the web app own its blank projects and editable examples while preserving AGR interoperability.
+
 ## 2026-11-21
 
 ### Added

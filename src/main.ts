@@ -1,3 +1,5 @@
+import coolingCurve from "./examples/cooling.agr";
+import measurementErrors from "./examples/measurement_errors.agr";
 import { closeDialog, element, field, input, paragraph, select, showDialog } from "./web/dialog";
 import { engine } from "./web/engine";
 import type { Bounds, Command, Graph, Project, Request } from "./web/protocol";
@@ -12,6 +14,14 @@ const dataFile = element<HTMLInputElement>("data-file");
 const controls = Array.from(document.querySelectorAll<HTMLButtonElement>("button[data-action]"));
 const menus = Array.from(document.querySelectorAll<HTMLDetailsElement>("nav details"));
 const editControls = controls.filter((button) => button.hasAttribute("data-edit"));
+const examples = [
+  { filename: "cooling.agr", title: "Cooling curve", source: coolingCurve },
+  {
+    filename: "measurement_errors.agr",
+    title: "Calibration measurements with error bars",
+    source: measurementErrors,
+  },
+] as const;
 
 let project: Project | undefined;
 let currentGraph = 0;
@@ -476,22 +486,26 @@ const actions: Record<string, () => void | Promise<void>> = {
   about: () =>
     showDialog("About Grace", [
       paragraph("Grace - GRaphing, Advanced Computation and Exploration of data"),
-      paragraph("Based on Grace 5.1.25. See the User's Guide for credits and license terms."),
+      paragraph("Based on Grace 5.1.25. Use Help to find the source code and license terms."),
     ]),
   examples: () => {
-    const filenames = ["log2log.agr", "terr.agr", "manygraphs.agr", "polar.agr", "typeset.agr"];
     const example = select(
       "example",
-      filenames.map((name) => [name, name]),
-      filenames[0] ?? "",
+      examples.map(({ filename, title }) => [filename, title]),
+      examples[0].filename,
     );
-    showDialog("Examples", [field("Project", example)], async (data) => {
-      const name = text(data.get("example"));
-      if (!filenames.includes(name)) return;
-      const response = await fetch(new URL(`./examples/${name}`, import.meta.url));
-      if (!response.ok) throw new Error("Could not open the example.");
-      await load(new File([await response.blob()], name));
-    });
+    const fields = [field("Project", example)];
+    showDialog(
+      "Examples",
+      edited
+        ? [paragraph("Opening an example discards unsaved changes to this project."), ...fields]
+        : fields,
+      async (data) => {
+        const selection = examples.find(({ filename }) => filename === data.get("example"));
+        if (!selection) throw new Error("Select an example project.");
+        await load(new File([selection.source], selection.filename));
+      },
+    );
   },
   locator: () => {
     const bar = element("locator-bar");

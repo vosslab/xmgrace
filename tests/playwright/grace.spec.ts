@@ -51,3 +51,23 @@ test("unsupported Grace projects retain the original and disable export", async 
     "Line 2: Unsupported Grace setting: g0 type Polar",
   );
 });
+
+test("the built-in examples open as editable projects", async ({ page }) => {
+  await page.goto("./");
+  await expect(page.locator("#status-bar")).toHaveText("G0  |  0 sets");
+  for (const filename of ["cooling.agr", "measurement_errors.agr"]) {
+    await page.getByText("Help", { exact: true }).click();
+    await page.getByRole("button", { name: "Examples..." }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByRole("combobox").selectOption(filename);
+    await dialog.getByRole("button", { name: "Accept" }).click();
+    await expect(page.locator("#project-title")).toHaveText(`Grace: ${filename}`);
+    await expect(page.getByText("Read-only preview.")).toBeHidden();
+    await expect(page.locator("#status-bar")).toHaveText("G0  |  1 set");
+  }
+  await page.getByText("File", { exact: true }).click();
+  await expect(page.getByRole("button", { name: "Save", exact: true })).toBeEnabled();
+  await page.getByRole("button", { name: "New", exact: true }).click();
+  await expect(page.locator("#project-title")).toHaveText("Grace: Untitled.agr");
+  await expect(page.locator("#status-bar")).toHaveText("G0  |  0 sets");
+});

@@ -7,3 +7,6 @@ may inform [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md) once it is settled, and an
 origin belongs there too. Rules: [REPO_STYLE.md](REPO_STYLE.md).
 [PROPAGATED HEADER - ENTRIES BELOW ARE YOURS]
 <!-- VENDORED HEADER: END -->
+
+- This is a new project. I want to maintain the browser app and use the pre-production stage to
+  improve foundational schemas, contracts, and ownership boundaries.

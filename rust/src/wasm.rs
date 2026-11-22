@@ -1,4 +1,4 @@
-use crate::{Diagnostic, Project, TEMPLATE, autoscale, import_ascii, open, save, set_world, svg};
+use crate::{Diagnostic, Project, autoscale, import_ascii, open, save, set_world, svg};
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
@@ -52,6 +52,7 @@ fn label(text: &str) -> Result<String, Diagnostic> {
 }
 
 #[wasm_bindgen]
+#[derive(Default)]
 pub struct Grace {
     project: Project,
 }
@@ -59,10 +60,8 @@ pub struct Grace {
 #[wasm_bindgen]
 impl Grace {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> Result<Grace, JsValue> {
-        Ok(Self {
-            project: open(TEMPLATE).map_err(reject)?,
-        })
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn open_project(&mut self, bytes: &[u8]) -> Result<(), JsValue> {
@@ -70,8 +69,8 @@ impl Grace {
         Ok(())
     }
 
-    pub fn new_project(&mut self) -> Result<(), JsValue> {
-        self.open_project(TEMPLATE)
+    pub fn new_project(&mut self) {
+        self.project = Project::new();
     }
 
     pub fn import_data(&mut self, graph: u32, bytes: &[u8]) -> Result<(), JsValue> {
