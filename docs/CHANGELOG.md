@@ -1,3 +1,18 @@
+## 2026-11-24
+
+### Additions and New Features
+
+- Added a pausable Fourier walkthrough under Help that opens in a separate practice tab.
+
+### Behavior or Interface Changes
+
+- Refined Grace's controls with subtle translucent menus and dialogs, clearer button states,
+  and a more visible Create new control in the Data sets dialog.
+
+### Fixes and Maintenance
+
+- Refreshed the README cooling plot and added a reproducible animated WebP of the Fourier demo.
+
 ## 2026-11-22
 
 ### Additions and New Features

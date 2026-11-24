@@ -1,4 +1,5 @@
 import { field, formText, input, paragraph, select, showDialog } from "./dialog";
+import { guidedDemoHint } from "./guided_demo";
 import { isSetKind, setColumns } from "./set_types";
 import type { Command, Graph, Region, SeriesOperation, SetKind } from "./protocol";
 
@@ -59,9 +60,13 @@ function selectedSet(data: FormData): number {
 }
 
 export function formulaDialog(context: DataContext): void {
+  const hint = guidedDemoHint("formula");
+  const guide = hint ? paragraph(hint) : undefined;
+  if (guide) guide.className = "dialog-guide-hint";
   showDialog(
     "Create by formula",
     [
+      ...(guide ? [guide] : []),
       paragraph("Use $t as the sampled parameter. Functions include sin, cos, exp, log, and sqrt."),
       field("Start", input("start", "0")),
       field("Stop", input("stop", "2*pi")),
@@ -186,9 +191,13 @@ export function evaluateDialog(context: DataContext): void {
 export function fourierDialog(context: DataContext): void {
   const picker = requireSet(context, "Fourier transforms");
   if (!picker) return;
+  const hint = guidedDemoHint("fourier");
+  const guide = hint ? paragraph(hint) : undefined;
+  if (guide) guide.className = "dialog-guide-hint";
   showDialog(
     "Fourier transforms",
     [
+      ...(guide ? [guide] : []),
       field("Input set", picker),
       field(
         "Algorithm",

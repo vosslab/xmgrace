@@ -3,22 +3,25 @@
   font:
     0.875rem/1.45 system-ui,
     sans-serif;
-  color: #182c3a;
-  background: #f6f8fa;
-  --ink: #182c3a;
-  --muted: #506572;
+  color: #18303f;
+  background: #eaf0f3;
+  --ink: #18303f;
+  --muted: #516b78;
   --surface: #ffffff;
-  --workspace: #edf2f5;
-  --divider: #d5dfe5;
-  --control-border: #8296a2;
-  --hover: #eef4f7;
-  --accent: #146966;
-  --accent-strong: #0f5553;
-  --accent-soft: #dbf2ed;
+  --glass: #ffffff;
+  --glass-strong: #f8fcfd;
+  --workspace: #e5edf0;
+  --divider: #c5d4da;
+  --control-border: #556c78;
+  --hover: #e5f1f1;
+  --accent: #0e6a67;
+  --accent-strong: #085250;
+  --accent-soft: #d9f0ed;
   --focus: #176ca3;
-  --control-radius: 0.5rem;
-  --panel-radius: 0.8rem;
-  --surface-shadow: 0 12px 32px #1733441c, 0 2px 5px #1733440d;
+  --control-radius: 0.6rem;
+  --panel-radius: 1rem;
+  --surface-shadow: 0 18px 40px #1733441f, 0 3px 8px #17334412;
+  --control-shadow: 0 1px 2px #17334414, inset 0 1px #ffffff8c;
 }
 
 * {
@@ -50,6 +53,7 @@ input:not([type="checkbox"], [type="file"]) {
   border: 1px solid var(--control-border);
   border-radius: var(--control-radius);
   background: var(--surface);
+  box-shadow: var(--control-shadow);
   padding: 0.35rem 0.7rem;
 }
 
@@ -66,6 +70,7 @@ button:enabled:hover,
 summary:hover,
 .menu a:hover {
   background: var(--hover);
+  border-color: var(--accent);
 }
 
 button:disabled {
@@ -86,11 +91,14 @@ button[aria-pressed="true"]:enabled {
 }
 
 header {
-  background: var(--surface);
+  position: relative;
+  z-index: 2;
+  background: var(--glass);
+  border-block-end: 1px solid #ffffff9c;
 }
 
 .titlebar {
-  background: #183648;
+  background: linear-gradient(112deg, #163949, #0d605e);
   color: #f4fbfd;
   padding: 0.7rem 1rem;
   overflow-wrap: anywhere;
@@ -106,6 +114,7 @@ nav {
   flex-wrap: wrap;
   gap: 0.25rem;
   padding: 0.4rem 0.75rem;
+  background: var(--surface);
 }
 
 nav > details {
@@ -146,7 +155,7 @@ details[open] summary {
   max-inline-size: min(20rem, calc(100vw - 1rem));
   margin-block-start: 0.25rem;
   padding: 0.35rem;
-  background: var(--surface);
+  background: var(--glass-strong);
   border: 1px solid var(--divider);
   border-radius: var(--panel-radius);
   box-shadow: var(--surface-shadow);
@@ -238,16 +247,48 @@ nav > details:last-child > .menu {
 }
 
 .dialog-submenu {
-  padding: 0.4rem 0;
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.3rem;
+  border: 1px solid var(--divider);
+  border-radius: var(--control-radius);
+  background: var(--surface);
 }
 
 .dialog-submenu summary {
-  min-block-size: auto;
-  padding: 0.25rem 0;
+  justify-content: space-between;
+  min-block-size: 2.5rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--accent);
+  color: white;
+  background: var(--accent);
+  box-shadow: var(--control-shadow);
 }
 
-.dialog-submenu button {
-  margin: 0.35rem 0 0 0.7rem;
+.dialog-submenu summary::after {
+  content: "";
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-block-end: 2px solid currentColor;
+  border-inline-end: 2px solid currentColor;
+  transform: rotate(45deg) translate(-0.15rem, -0.15rem);
+}
+
+.dialog-submenu[open] summary,
+.dialog-submenu summary:hover {
+  color: white;
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.dialog-submenu[open] summary::after {
+  transform: rotate(-135deg) translate(-0.1rem, -0.1rem);
+}
+
+.dialog-submenu > button {
+  margin-block-start: 0.25rem;
+  margin-inline-end: 0.25rem;
+  text-align: start;
 }
 
 .locator {
@@ -256,7 +297,8 @@ nav > details:last-child > .menu {
   align-items: center;
   gap: 0.4rem 1rem;
   padding: 0.5rem 1rem;
-  border-block: 1px solid var(--divider);
+  border-block: 1px solid #ffffff9c;
+  background: var(--surface);
   color: var(--muted);
 }
 
@@ -283,8 +325,8 @@ main {
   gap: 0.75rem;
   overflow: auto;
   padding: 0.75rem;
-  border-inline-end: 1px solid var(--divider);
-  background: var(--surface);
+  border-inline-end: 1px solid #ffffff9c;
+  background: var(--glass);
 }
 
 .toolbar-group {
@@ -330,7 +372,9 @@ main {
   min-inline-size: 0;
   overflow: auto;
   padding: clamp(0.65rem, 2vw, 1.5rem);
-  background: var(--workspace);
+  background:
+    radial-gradient(circle at 20% 0%, #ffffffa8, transparent 28rem),
+    linear-gradient(135deg, #edf5f5, var(--workspace));
 }
 
 #canvas {
@@ -392,19 +436,19 @@ dialog {
   border: 1px solid var(--divider);
   border-radius: var(--panel-radius);
   color: var(--ink);
-  background: var(--surface);
+  background: var(--glass-strong);
   box-shadow: var(--surface-shadow);
 }
 
 dialog::backdrop {
-  background: #122c4270;
+  background: #12324358;
 }
 
 dialog h2 {
   margin: 0;
   padding: 0.85rem 1.1rem;
   border-block-end: 1px solid var(--divider);
-  background: #f6fafb;
+  background: var(--surface);
   font-size: 1.18em;
 }
 
@@ -450,6 +494,98 @@ input:not([type="checkbox"], [type="file"]),
   background: var(--accent-strong);
 }
 
+@supports (backdrop-filter: blur(1px)) {
+  :root {
+    --glass: #ffffffd9;
+    --glass-strong: #f8fcfde8;
+  }
+
+  .menu,
+  dialog,
+  #guided-demo {
+    backdrop-filter: blur(18px) saturate(1.18);
+  }
+
+  nav,
+  .locator {
+    background: #ffffff80;
+  }
+
+  dialog h2 {
+    background: #ffffff94;
+  }
+}
+
+#guided-demo {
+  position: relative;
+  z-index: 0;
+  align-self: flex-start;
+  flex: 0 1 23rem;
+  inline-size: clamp(17rem, 28vw, 23rem);
+  margin: 0.75rem 0.75rem 0.75rem 0;
+  padding: 1rem;
+  border: 1px solid var(--divider);
+  border-radius: var(--panel-radius);
+  background: var(--glass-strong);
+  box-shadow: var(--surface-shadow);
+}
+
+.guided-demo-title {
+  margin: 0;
+  color: var(--accent-strong);
+  font-size: 1.05em;
+}
+
+.guided-demo-progress,
+.guided-demo-instruction {
+  margin-block: 0.4rem 0;
+}
+
+.guided-demo-progress {
+  color: var(--muted);
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+}
+
+.guided-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-block-start: 0.85rem;
+}
+
+body[data-guided-demo="paused"] #guided-demo {
+  align-self: flex-start;
+  flex-basis: auto;
+  inline-size: auto;
+  padding: 0.5rem;
+}
+
+body[data-guided-demo="paused"] .guided-demo-actions {
+  margin-block-start: 0;
+}
+
+#guided-demo-next,
+#guided-demo-resume,
+#guided-demo-finish {
+  color: white;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+:is(#guided-demo-next, #guided-demo-resume, #guided-demo-finish):hover {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.dialog-guide-hint {
+  padding: 0.65rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--control-radius);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
 #dialog-error {
   color: #8b220e;
 }
@@ -457,10 +593,20 @@ input:not([type="checkbox"], [type="file"]),
 @media (prefers-reduced-motion: no-preference) {
   button,
   summary,
-  .menu a {
+  .menu a,
+  #guided-demo {
     transition:
       background-color 120ms ease-out,
-      border-color 120ms ease-out;
+      border-color 120ms ease-out,
+      box-shadow 120ms ease-out;
+  }
+}
+
+@media (forced-colors: active) {
+  .menu,
+  dialog,
+  #guided-demo {
+    backdrop-filter: none;
   }
 }
 
@@ -512,7 +658,7 @@ input:not([type="checkbox"], [type="file"]),
     gap: 0.4rem 0.65rem;
     padding: 0.55rem 0.75rem;
     border-inline-end: 0;
-    border-block-end: 1px solid var(--divider);
+    border-block-end: 1px solid #ffffff9c;
   }
 
   .toolbar-group {
@@ -531,6 +677,13 @@ input:not([type="checkbox"], [type="file"]),
     min-inline-size: 2.5rem;
     padding-inline: 0.4rem;
   }
+
+  #guided-demo {
+    align-self: stretch;
+    flex-basis: auto;
+    inline-size: auto;
+    margin: 0.75rem;
+  }
 }
 
 @media print {
@@ -546,6 +699,7 @@ input:not([type="checkbox"], [type="file"]),
 
   header,
   #toolbar,
+  #guided-demo,
   footer,
   #diagnostic-banner,
   dialog {

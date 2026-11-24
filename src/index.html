@@ -188,6 +188,7 @@
             >
             <hr />
             <button data-action="examples">Examples</button>
+            <button data-action="guided-demo">Guided demo...</button>
             <button data-action="about">About...</button>
             <hr />
             <a
@@ -265,6 +266,18 @@
         <output id="world-stack" aria-label="World stack"></output>
         <div class="toolbar-group">
           <button data-action="exit" title="Close the current project">Exit</button>
+        </div>
+      </aside>
+      <aside id="guided-demo" aria-label="Guided demo" hidden>
+        <p class="guided-demo-progress" id="guided-demo-progress" role="status" aria-live="polite"></p>
+        <h2 class="guided-demo-title" id="guided-demo-title">Guided demo</h2>
+        <p class="guided-demo-instruction" id="guided-demo-instruction"></p>
+        <div class="guided-demo-actions">
+          <button id="guided-demo-back" type="button">Back</button>
+          <button id="guided-demo-next" type="button">Continue</button>
+          <button id="guided-demo-pause" type="button">Pause</button>
+          <button id="guided-demo-resume" type="button" hidden>Resume</button>
+          <button id="guided-demo-finish" type="button" hidden>Finish</button>
         </div>
       </aside>
       <section id="workspace" aria-label="Plot workspace">

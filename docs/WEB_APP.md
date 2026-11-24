@@ -78,3 +78,19 @@ cp "$capture_dir/cooling_curve.webp" docs/screenshots/cooling_curve.webp
 rm "$capture_dir/cooling_curve.png" "$capture_dir/cooling_curve.webp"
 rmdir "$capture_dir"
 ```
+
+## Capture the Fourier demo
+
+The short README animation opens the guided demo, creates a two-tone signal through Grace's
+normal formula dialog, and then applies its FFT. Start the local preview as above, make
+`img2webp` and `webpmux` available on your path, then run the capture from the repository root.
+It writes a one-play 960 by 600 animated WebP with waveform, Fourier, and final-spectrum states.
+The harness verifies its frame count, playback metadata, and 1 MB screenshot budget.
+
+```bash
+capture_dir=$(mktemp -d)
+node tests/playwright/capture_demo.mjs http://localhost:8787/ "$capture_dir/fourier_demo.webp"
+cp "$capture_dir/fourier_demo.webp" docs/screenshots/fourier_demo.webp
+rm "$capture_dir/fourier_demo.webp"
+rmdir "$capture_dir"
+```

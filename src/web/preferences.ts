@@ -86,13 +86,13 @@ function number(data: FormData, name: string, valid: (value: number) => boolean)
  * Owns browser-only display and navigation preferences. Project files deliberately do not
  * contain these values, matching Grace's application preferences rather than plot state.
  */
-export function preferences(): {
+export function preferences(sessionOnly = false): {
   values: () => Preferences;
   dialog: () => void;
   apply: () => void;
   toggle: (part: "toolbar" | "status" | "locator") => void;
 } {
-  let values = stored();
+  let values = sessionOnly ? { ...defaults } : stored();
 
   function apply(): void {
     element<HTMLElement>("toolbar").hidden = !values.toolbarVisible;
@@ -105,6 +105,7 @@ export function preferences(): {
   }
 
   function save(): void {
+    if (sessionOnly) return;
     try {
       localStorage.setItem(storageKey, JSON.stringify(values));
     } catch {

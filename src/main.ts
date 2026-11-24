@@ -31,6 +31,7 @@ import { newSpreadsheetDialog, spreadsheetDialog } from "./web/data_table";
 import { engine } from "./web/engine";
 import { figureExportDialog } from "./web/figure_export";
 import { graphDialogs } from "./web/graph_dialogs";
+import { guidedDemo } from "./web/guided_demo";
 import { inspectorDialogs } from "./web/inspector_dialogs";
 import { navigation } from "./web/navigation";
 import { netcdfDialog } from "./web/netcdf_dialog";
@@ -61,6 +62,7 @@ const examples = [
     source: measurementErrors,
   },
 ] as const;
+const sessionDemo = new URLSearchParams(window.location.search).get("demo") === "1";
 
 let project: Project | undefined;
 let currentGraph = 0;
@@ -432,7 +434,7 @@ function graphDialog(): void {
   );
 }
 
-const settings = preferences();
+const settings = preferences(sessionDemo);
 const plotNavigation = navigation({
   graph,
   project: () => project,
@@ -455,6 +457,7 @@ const appearance = appearanceDialogs({
   activeSet: () => currentSet,
   apply,
 });
+const demo = guidedDemo();
 
 function resetProject(): void {
   confirmDiscard(async () => {
@@ -495,6 +498,7 @@ const actions: Record<string, () => void | Promise<void>> = {
   }),
   ...regionDialogs({ project: () => project, activeGraph: () => currentGraph, apply }),
   commands: () => commandDialog((input) => run({ type: "script", graph: currentGraph, input })),
+  "guided-demo": demo.open,
   new: resetProject,
   exit: resetProject,
   open: () => confirmDiscard(() => projectFile.click()),
@@ -754,4 +758,5 @@ window.addEventListener("beforeunload", (event) => {
 
 refreshControls();
 settings.apply();
+if (sessionDemo) demo.start();
 void run({ type: "state" }).catch(report);

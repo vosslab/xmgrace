@@ -10,13 +10,16 @@ and run data transformations such as FFT and curve fitting. It downloads AGR pro
 SVG, PNG, JPEG, and PDF figures. Projects with unsupported settings open as read-only previews
 with diagnostics. [Browser compatibility](docs/WEB_APP.md#compatibility)
 
-## A plot in Grace
+## See Grace in action
 
-The example below turns seven time and temperature readings into a plot with labeled axes.
-The data stays in your browser.
+The cooling plot shows seven time and temperature readings with labeled axes. The Fourier demo
+generates a two-tone signal and reveals its two frequencies. You can pause the guide, experiment
+with the plot in a practice tab, and resume at the same step.
+[Try the guided demo](https://vosslab.github.io/xmgrace/?demo=1)
 
 <!-- screenshots:begin (managed by screenshot-docs) -->
 ![Grace window showing a blue cooling curve with labeled time and temperature axes](docs/screenshots/cooling_curve.webp)
+![Grace transforms a two-tone waveform into a spectrum with peaks at bins 5 and 13](docs/screenshots/fourier_demo.webp)
 <!-- screenshots:end -->
 
 ## Quick start
