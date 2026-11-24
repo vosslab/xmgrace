@@ -1,108 +1,150 @@
 import { element } from "./dialog";
+import type { Command, Graph } from "./protocol";
 
-type Step = {
-  name: string;
-  text: string;
-  hint?: "formula" | "fourier";
+type Context = {
+  apply: (command: Command) => Promise<void>;
+  graph: () => Graph | undefined;
+  ready: () => boolean;
 };
 
-const hints = {
-  formula:
-    "Enter 0, 2*pi*127/128, 128, $t, and sin(5*$t)+0.5*sin(13*$t) for Start, Stop, Points, X, and Y. Then choose Accept.",
-  fourier:
-    "Select the 128-point signal as the input set. Keep Fast Fourier transform, Magnitude, and Index, then choose Accept. Peaks appear at bins 5 and 13.",
-};
-
-const steps: readonly Step[] = [
-  {
-    name: "Create a signal",
-    text: `Open the formula editor from Edit > Data sets > Create new. ${hints.formula}`,
-    hint: "formula",
-  },
-  {
-    name: "Find its frequencies",
-    text: `Open Fourier transforms under Data > Transformations. ${hints.fourier}`,
-    hint: "fourier",
-  },
-  {
-    name: "Save the project",
-    text: "Use File > Save as to download your editable AGR project. Finish leaves this practice plot open for further exploration.",
-  },
-];
-
-export function guidedDemoHint(step: "formula" | "fourier"): string | undefined {
-  return document.body.dataset.guidedDemo === step ? hints[step] : undefined;
-}
-
-export type GuidedDemo = {
+export function guidedDemo(context: Context): {
   open: () => void;
   start: () => void;
-};
-
-export function guidedDemo(): GuidedDemo {
-  const panel = element<HTMLElement>("guided-demo");
+  stop: () => void;
+} {
+  const panel = element("guided-demo");
   const title = element("guided-demo-title");
   const instruction = element("guided-demo-instruction");
-  const progress = element("guided-demo-progress");
-  const back = element<HTMLButtonElement>("guided-demo-back");
-  const next = element<HTMLButtonElement>("guided-demo-next");
   const pause = element<HTMLButtonElement>("guided-demo-pause");
   const resume = element<HTMLButtonElement>("guided-demo-resume");
-  const finish = element<HTMLButtonElement>("guided-demo-finish");
-  let step = 0;
+  const dismiss = element<HTMLButtonElement>("guided-demo-finish");
+  let timer = 0;
+  let signal: string | undefined;
+  let complete = false;
+  let failure: string | undefined;
   let paused = false;
+  let running = false;
 
   function render(): void {
-    const current = steps[step]!;
-    document.body.dataset.guidedDemo = paused ? "paused" : (current.hint ?? "active");
-    panel.hidden = false;
-    title.textContent = current.name;
-    instruction.textContent = current.text;
-    progress.textContent = `Step ${step + 1} of ${steps.length}`;
-    title.hidden = paused;
-    instruction.hidden = paused;
-    progress.hidden = paused;
-    back.hidden = paused || step === 0;
-    next.hidden = paused || step === steps.length - 1;
-    pause.hidden = paused;
-    resume.hidden = !paused;
-    finish.hidden = paused || step !== steps.length - 1;
+    const finished = complete || failure !== undefined;
+    const compact = paused && !finished;
+    const moveFocus =
+      finished && [pause, resume].includes(document.activeElement as HTMLButtonElement);
+    panel.classList.toggle("demo-paused", compact);
+    title.textContent = failure
+      ? "Demo stopped"
+      : complete
+        ? "Fourier spectrum"
+        : signal === undefined
+          ? "Creating a signal"
+          : "Two-tone signal";
+    instruction.textContent =
+      failure ??
+      (complete
+        ? "Use the plot controls to explore the result."
+        : signal === undefined
+          ? "Generating 128 samples."
+          : "Next, Grace calculates the Fourier spectrum.");
+    title.hidden = compact;
+    instruction.hidden = compact;
+    pause.hidden = paused || finished;
+    resume.hidden = !compact;
+    dismiss.textContent = finished ? "Keep exploring" : "Stop";
+    if (moveFocus) dismiss.focus();
   }
 
-  function start(): void {
-    step = 0;
-    paused = false;
-    render();
+  function schedule(): void {
+    if (panel.hidden || paused || running || complete || failure !== undefined) return;
+    timer = window.setTimeout(() => void advance(), signal === undefined ? 1000 : 2500);
   }
 
-  back.addEventListener("click", () => {
-    step = Math.max(0, step - 1);
-    render();
-    (step === 0 ? next : back).focus();
-  });
-  next.addEventListener("click", () => {
-    step = Math.min(steps.length - 1, step + 1);
-    render();
-    (step === steps.length - 1 ? finish : next).focus();
-  });
-  pause.addEventListener("click", () => {
+  function suspend(): void {
+    if (panel.hidden || paused || complete || failure !== undefined) return;
+    window.clearTimeout(timer);
     paused = true;
     render();
+  }
+
+  async function advance(): Promise<void> {
+    if (!context.ready()) {
+      suspend();
+      return;
+    }
+    running = true;
+    try {
+      if (signal === undefined) {
+        const previousSets = context.graph()?.sets ?? {};
+        await context.apply({
+          type: "generate",
+          graph: 0,
+          start: "0",
+          stop: "2*pi*127/128",
+          points: 128,
+          x: "$t",
+          y: "sin(5*$t)+0.5*sin(13*$t)",
+        });
+        signal = Object.keys(context.graph()?.sets ?? {}).find((id) => !(id in previousSets));
+        if (signal === undefined) throw new Error("The demo signal could not be created.");
+      } else {
+        if (context.graph()?.sets[signal]?.count !== 128)
+          throw new Error("The demo signal is no longer available.");
+        await context.apply({
+          type: "fourier",
+          graph: 0,
+          set: Number(signal),
+          options: {
+            algorithm: "fft",
+            input: "real",
+            direction: "forward",
+            output: "magnitude",
+            abscissa: "index",
+            window: "none",
+          },
+        });
+        complete = true;
+      }
+    } catch (error) {
+      failure = error instanceof Error ? error.message : "The demo could not continue.";
+    } finally {
+      running = false;
+      if (!panel.hidden) render();
+      schedule();
+    }
+  }
+
+  function interrupt(event: PointerEvent): void {
+    if (event.target instanceof Node && !panel.contains(event.target)) suspend();
+  }
+
+  function stop(): void {
+    window.clearTimeout(timer);
+    document.removeEventListener("click", interrupt, true);
+    panel.hidden = true;
+  }
+
+  pause.addEventListener("click", () => {
+    suspend();
     resume.focus();
   });
   resume.addEventListener("click", () => {
     paused = false;
     render();
-    (step === steps.length - 1 ? finish : pause).focus();
+    pause.focus();
+    schedule();
   });
-  finish.addEventListener("click", () => {
-    panel.hidden = true;
-    delete document.body.dataset.guidedDemo;
-    element<HTMLElement>("canvas").focus();
+  dismiss.addEventListener("click", () => {
+    stop();
+    element("canvas").focus();
   });
 
   return {
     open: () => window.open("?demo=1", "_blank", "noopener"),
-    start,
+    start: (): void => {
+      panel.hidden = false;
+      document.addEventListener("click", interrupt, true);
+      render();
+      schedule();
+    },
+    stop,
   };
 }

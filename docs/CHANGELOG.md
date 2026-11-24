@@ -8,6 +8,8 @@
 
 - Refined Grace's controls with subtle translucent menus and dialogs, clearer button states,
   and a more visible Create new control in the Data sets dialog.
+- Made the Fourier demo run automatically. Pause it to edit the plot, resume from the current
+  stage, or stop and keep the work in the practice tab.
 
 ### Fixes and Maintenance
 

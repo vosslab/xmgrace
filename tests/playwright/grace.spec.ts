@@ -128,7 +128,7 @@ test("the built-in examples open as editable projects", async ({ page }) => {
   await expect(page.locator("#status-bar")).toHaveText("G0  |  0 sets");
 });
 
-test("guided demo keeps the original project intact while teaching a pausable FFT workflow", async ({
+test("automatic demo keeps the original project intact and resumes its FFT after exploration", async ({
   page,
 }, testInfo) => {
   await page.addInitScript(() =>
@@ -161,9 +161,15 @@ test("guided demo keeps the original project intact while teaching a pausable FF
   await expect(demo.locator("#status-bar")).toHaveText("G0  |  0 sets");
   const guide = demo.getByLabel("Guided demo");
   await expect(guide).toBeVisible();
-  await expect(guide).toContainText("Step 1 of 3");
-  await expect(guide).toContainText("Create a signal");
+  await expect(guide.getByRole("heading")).toHaveText("Creating a signal");
   await expect(demo.getByLabel("Grace toolbar")).toBeVisible();
+  await expect(demo.locator("#status-bar")).toHaveText("G0  |  1 set");
+  await expect(guide.getByRole("heading")).toHaveText("Two-tone signal");
+
+  await guide.getByRole("button", { name: "Pause", exact: true }).click();
+  await expect(guide.getByRole("heading")).toBeHidden();
+  await expect(demo.getByRole("button", { name: "Resume", exact: true })).toBeFocused();
+  await expect(guide.getByRole("button", { name: "Stop", exact: true })).toBeVisible();
   await demo.getByText("View", { exact: true }).click();
   await demo.getByRole("button", { name: "Show locator bar", exact: true }).click();
   await expect(demo.locator("#locator-bar")).toBeHidden();
@@ -172,41 +178,15 @@ test("guided demo keeps the original project intact while teaching a pausable FF
   await expect(normal.locator("#locator-bar")).toBeVisible();
   await normal.close();
 
-  await demo.getByText("Edit", { exact: true }).click();
-  await demo.getByRole("button", { name: "Data sets..." }).click();
-  await demo.getByText("Create new", { exact: true }).click();
-  await demo.getByRole("button", { name: "By formula..." }).click();
-  const formula = demo.getByRole("dialog");
-  await expect(formula).toContainText("2*pi*127/128");
-  await formula.getByLabel("Stop", { exact: true }).fill("2*pi*127/128");
-  await formula.getByLabel("Points", { exact: true }).fill("128");
-  await formula.getByLabel("Y", { exact: true }).fill("sin(5*$t)+0.5*sin(13*$t)");
-  await formula.getByRole("button", { name: "Accept", exact: true }).click();
-  await expect(demo.locator("#status-bar")).toHaveText("G0  |  1 set");
-
-  await guide.getByRole("button", { name: "Pause", exact: true }).click();
-  await expect(guide.getByRole("heading")).toBeHidden();
-  await expect(demo.getByRole("button", { name: "Resume", exact: true })).toBeFocused();
   await demo.getByText("Plot", { exact: true }).click();
   await demo.getByRole("button", { name: "Graph appearance..." }).click();
   await demo.getByLabel("Title", { exact: true }).fill("Changed during pause");
   await demo.getByRole("dialog").getByRole("button", { name: "Accept", exact: true }).click();
+  await page.waitForTimeout(3_000);
+  await expect(demo.locator("#status-bar")).toHaveText("G0  |  1 set");
   await guide.getByRole("button", { name: "Resume", exact: true }).click();
-  await expect(guide).toContainText("Create a signal");
-  await expect(guide.getByRole("button", { name: "Pause", exact: true })).toBeFocused();
-
-  await guide.getByRole("button", { name: "Continue", exact: true }).click();
-  await expect(guide).toContainText("Find its frequencies");
-  await demo.getByText("Data", { exact: true }).click();
-  await demo.getByText("Transformations", { exact: true }).click();
-  await demo.getByRole("button", { name: "Fourier transforms..." }).click();
-  const transform = demo.getByRole("dialog");
-  await expect(transform).toContainText("Peaks appear at bins 5 and 13.");
-  await transform.getByRole("button", { name: "Accept", exact: true }).click();
   await expect(demo.locator("#status-bar")).toHaveText("G0  |  2 sets");
-
-  await guide.getByRole("button", { name: "Continue", exact: true }).click();
-  await expect(guide).toContainText("Save the project");
+  await expect(guide.getByRole("heading")).toHaveText("Fourier spectrum");
   await demo.getByText("File", { exact: true }).click();
   const download = demo.waitForEvent("download");
   await demo.getByRole("button", { name: "Save as...", exact: true }).click();
@@ -229,9 +209,24 @@ test("guided demo keeps the original project intact while teaching a pausable FF
   expect(magnitudeAt(13)).toBeGreaterThan(magnitudeAt(12));
   expect(magnitudeAt(13)).toBeGreaterThan(magnitudeAt(14));
 
-  await guide.getByRole("button", { name: "Finish", exact: true }).click();
+  await guide.getByRole("button", { name: "Keep exploring", exact: true }).click();
   await expect(guide).toBeHidden();
   await expect(demo.locator("#canvas")).toBeFocused();
   await expect(page.locator("#status-bar")).toHaveText("G0  |  1 set");
   await expect(page.locator("#project-title")).toHaveText("Grace: Untitled.agr *");
+});
+
+test("automatic demo can stop after creating the signal", async ({ page }) => {
+  await page.goto("./?demo=1");
+  const guide = page.getByLabel("Guided demo");
+  await expect(page.locator("#status-bar")).toHaveText("G0  |  1 set");
+  await expect(guide.getByRole("heading")).toHaveText("Two-tone signal");
+  await page.getByText("Plot", { exact: true }).click();
+  await expect(guide.getByRole("heading")).toBeHidden();
+  await guide.getByRole("button", { name: "Resume", exact: true }).click();
+  await guide.getByRole("button", { name: "Stop", exact: true }).click();
+  await expect(guide).toBeHidden();
+  await expect(page.locator("#status-bar")).toHaveText("G0  |  1 set");
+  await page.waitForTimeout(3_000);
+  await expect(page.locator("#status-bar")).toHaveText("G0  |  1 set");
 });

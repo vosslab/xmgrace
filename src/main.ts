@@ -100,6 +100,7 @@ async function run(request: Request): Promise<void> {
   try {
     const response = await engine(request);
     if (response.type !== "state") throw new Error("Expected a Grace project.");
+    if (sessionDemo && (request.type === "open" || request.type === "new")) demo.stop();
     project = response.project;
     if (
       request.type === "apply" ||
@@ -457,7 +458,11 @@ const appearance = appearanceDialogs({
   activeSet: () => currentSet,
   apply,
 });
-const demo = guidedDemo();
+const demo = guidedDemo({
+  apply,
+  graph: () => project?.graphs[0],
+  ready: () => !active && editable() && !element<HTMLDialogElement>("properties").open,
+});
 
 function resetProject(): void {
   confirmDiscard(async () => {
@@ -758,5 +763,8 @@ window.addEventListener("beforeunload", (event) => {
 
 refreshControls();
 settings.apply();
-if (sessionDemo) demo.start();
-void run({ type: "state" }).catch(report);
+void run({ type: "state" })
+  .then((): void => {
+    if (sessionDemo) demo.start();
+  })
+  .catch(report);

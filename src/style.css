@@ -536,15 +536,8 @@ input:not([type="checkbox"], [type="file"]),
   font-size: 1.05em;
 }
 
-.guided-demo-progress,
 .guided-demo-instruction {
   margin-block: 0.4rem 0;
-}
-
-.guided-demo-progress {
-  color: var(--muted);
-  font-size: 0.9em;
-  font-variant-numeric: tabular-nums;
 }
 
 .guided-demo-actions {
@@ -554,36 +547,26 @@ input:not([type="checkbox"], [type="file"]),
   margin-block-start: 0.85rem;
 }
 
-body[data-guided-demo="paused"] #guided-demo {
+#guided-demo.demo-paused {
   align-self: flex-start;
   flex-basis: auto;
   inline-size: auto;
   padding: 0.5rem;
 }
 
-body[data-guided-demo="paused"] .guided-demo-actions {
+.demo-paused .guided-demo-actions {
   margin-block-start: 0;
 }
 
-#guided-demo-next,
-#guided-demo-resume,
-#guided-demo-finish {
+#guided-demo-resume {
   color: white;
   background: var(--accent);
   border-color: var(--accent);
 }
 
-:is(#guided-demo-next, #guided-demo-resume, #guided-demo-finish):hover {
+#guided-demo-resume:hover {
   background: var(--accent-strong);
   border-color: var(--accent-strong);
-}
-
-.dialog-guide-hint {
-  padding: 0.65rem;
-  border: 1px solid var(--accent);
-  border-radius: var(--control-radius);
-  background: var(--accent-soft);
-  color: var(--accent-strong);
 }
 
 #dialog-error {

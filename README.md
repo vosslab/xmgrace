@@ -13,13 +13,13 @@ with diagnostics. [Browser compatibility](docs/WEB_APP.md#compatibility)
 ## See Grace in action
 
 The cooling plot shows seven time and temperature readings with labeled axes. The Fourier demo
-generates a two-tone signal and reveals its two frequencies. You can pause the guide, experiment
-with the plot in a practice tab, and resume at the same step.
-[Try the guided demo](https://vosslab.github.io/xmgrace/?demo=1)
+automatically generates a two-tone signal and reveals its two frequencies. Pause to explore the
+practice plot, resume the sequence, or stop and keep the current project.
+[Run the Fourier demo](https://vosslab.github.io/xmgrace/?demo=1)
 
 <!-- screenshots:begin (managed by screenshot-docs) -->
 ![Grace window showing a blue cooling curve with labeled time and temperature axes](docs/screenshots/cooling_curve.webp)
-![Grace transforms a two-tone waveform into a spectrum with peaks at bins 5 and 13](docs/screenshots/fourier_demo.webp)
+![Grace automatically transforms a two-tone waveform into a spectrum with peaks at bins 5 and 13](docs/screenshots/fourier_demo.webp)
 <!-- screenshots:end -->
 
 ## Quick start
