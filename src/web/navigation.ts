@@ -413,27 +413,27 @@ export function navigation(context: Context): {
       down: () => scroll(0, -1),
       "auto-ticks": autoTicks,
       "auto-on": autoOn,
-      "world-push-zoom": () => {
+      "world-push-zoom": (): void => {
         push();
         setZoom("xy");
       },
       "world-push": push,
       "world-pop": pop,
       "world-cycle": cycle,
-      "locator-set-fixed": () => {
+      "locator-set-fixed": (): void => {
         if (!context.graph()) return;
         setZoom(undefined);
         pickLocator = true;
         canvas.classList.add("zoom");
         canvas.focus({ preventScroll: true });
       },
-      "locator-clear-fixed": () => {
+      "locator-clear-fixed": (): void => {
         if (pickLocator) setZoom(undefined);
         currentLocator().fixed = undefined;
       },
       "locator-properties": locatorProperties,
     },
-    reset: () => {
+    reset: (): void => {
       states.clear();
       locators.clear();
       setZoom(undefined);

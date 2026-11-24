@@ -12,6 +12,7 @@
 ### Fixes and Maintenance
 
 - Refreshed the README cooling plot and added a reproducible animated WebP of the Fourier demo.
+- Fixed Pages lint errors in plot navigation and allowed the PDF CLI to report errors and results.
 
 ## 2026-11-22
 

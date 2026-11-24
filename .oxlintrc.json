@@ -3,5 +3,13 @@
 	"extends": ["./oxlint.base.json"],
 	"options": {
 		"typeAware": true
-	}
+	},
+	"overrides": [
+		{
+			"files": ["tools/html_to_pdf.mjs"],
+			"rules": {
+				"no-console": "off"
+			}
+		}
+	]
 }
